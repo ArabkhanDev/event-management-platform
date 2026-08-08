@@ -36,9 +36,19 @@
 
 .event-list-grid {
   /* auto-fit (not auto-fill) collapses tracks with no card in them, so a
-     single event stretches full-width instead of leaving an empty second
-     column that only shows the grid's own gap-line background. */
+     single event stretches full-width rather than sitting in a half-width
+     column with dead space beside it. */
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+  /* Opt out of .grid's hairline treatment (1px gaps over a line-coloured
+     backdrop). Detached cards need real space between them, and an odd card
+     count would otherwise leave the backdrop showing through the empty
+     trailing track as a stray filled block. */
+  gap: var(--space-4);
+  background: none;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
 }
 
 .event-cell {
@@ -48,11 +58,16 @@
   gap: var(--space-3);
   text-decoration: none;
   color: var(--color-ink);
-  transition: background var(--dur) var(--ease);
+  /* Matches .card, so an event sits at the same radius as the create form
+     alongside it. */
+  border: var(--border);
+  border-radius: var(--radius-md);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
 
 .event-cell:hover {
   background: var(--color-primary-soft);
+  border-color: var(--color-line-strong);
 }
 
 .event-cell-top {

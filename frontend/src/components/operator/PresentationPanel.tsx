@@ -3,7 +3,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { api, API_BASE, ApiError } from "../../lib/api";
 import ChevronIcon from "../shared/ChevronIcon";
+import ExpandIcon from "../shared/ExpandIcon";
 import UploadIcon from "../shared/UploadIcon";
+import DeckFullscreen from "./DeckFullscreen";
 import type { PresentationDto } from "../../types/api";
 
 export default function PresentationPanel({
@@ -22,6 +24,7 @@ export default function PresentationPanel({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const upload = useMutation({
     mutationFn: (file: File) => {
@@ -38,10 +41,27 @@ export default function PresentationPanel({
     },
   });
 
+  // The newest slide a request has been fired for, and how many of those are
+  // still outstanding. Arrow presses arrive faster than the PATCH round-trips,
+  // and stepping from the last *confirmed* slide makes quick presses collapse
+  // onto the same target, silently dropping slides.
+  const pendingSlideRef = useRef<number | null>(null);
+  const inFlightSlideRef = useRef(0);
+
   const update = useMutation({
     mutationFn: ({ id, patch }: { id: string; patch: Partial<Pick<PresentationDto, "status" | "currentSlide">> }) =>
       api.patch<PresentationDto>(`/presentations/${id}`, patch),
     onSuccess: (presentation) => onUpsert(presentation),
+    onSettled: (_data, _error, variables) => {
+      if (variables.patch.currentSlide === undefined) return;
+      inFlightSlideRef.current -= 1;
+      // Only once the whole burst has settled does the confirmed slide agree
+      // with the last requested one, making it safe to step from props again.
+      if (inFlightSlideRef.current <= 0) {
+        inFlightSlideRef.current = 0;
+        pendingSlideRef.current = null;
+      }
+    },
   });
 
   const remove = useMutation({
@@ -74,9 +94,31 @@ export default function PresentationPanel({
 
   const active = presentations.find((p) => p.status === "ACTIVE") ?? null;
 
+  // Stopping or deleting the deck while presenting must not leave the operator
+  // stranded on a full-viewport overlay with nothing behind it.
+  useEffect(() => {
+    if (!active) setIsFullscreen(false);
+  }, [active]);
+
+  // A different deck starts at its own position, so any in-flight target from
+  // the previous one is meaningless.
+  useEffect(() => {
+    pendingSlideRef.current = null;
+    inFlightSlideRef.current = 0;
+  }, [active?.id]);
+
   function goToSlide(presentation: PresentationDto, slide: number) {
     if (slide < 1 || slide > presentation.slideCount) return;
+    pendingSlideRef.current = slide;
+    inFlightSlideRef.current += 1;
     update.mutate({ id: presentation.id, patch: { currentSlide: slide } });
+  }
+
+  // Steps relative to the newest requested slide rather than the last confirmed
+  // one, so holding down an arrow key does not lose slides.
+  function stepSlide(presentation: PresentationDto, delta: number) {
+    const from = pendingSlideRef.current ?? presentation.currentSlide;
+    goToSlide(presentation, from + delta);
   }
 
   // Arrow keys drive the deck while one is live — a presenter should not have
@@ -87,8 +129,8 @@ export default function PresentationPanel({
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) return;
       if (!active) return;
-      if (e.key === "ArrowRight") goToSlide(active, active.currentSlide + 1);
-      if (e.key === "ArrowLeft") goToSlide(active, active.currentSlide - 1);
+      if (e.key === "ArrowRight") stepSlide(active, 1);
+      if (e.key === "ArrowLeft") stepSlide(active, -1);
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -196,6 +238,14 @@ export default function PresentationPanel({
                     >
                       <ChevronIcon className="deck-chevron-next" />
                     </button>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-ghost deck-fullscreen-open"
+                      onClick={() => setIsFullscreen(true)}
+                    >
+                      <ExpandIcon />
+                      {t("operator.presentationPanel.fullscreen")}
+                    </button>
                   </div>
                   <p className="helper-text">{t("operator.presentationPanel.keyboardHint")}</p>
                   <p className="submitted-note">{t("operator.presentationPanel.liveNote")}</p>
@@ -247,6 +297,15 @@ export default function PresentationPanel({
           );
         })}
       </div>
+
+      {isFullscreen && active && (
+        <DeckFullscreen
+          presentation={active}
+          isNavigating={update.isPending}
+          onNavigate={(slide) => goToSlide(active, slide)}
+          onClose={() => setIsFullscreen(false)}
+        />
+      )}
     </div>
   );
 }

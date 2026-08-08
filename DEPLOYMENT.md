@@ -28,17 +28,33 @@ the repository is public, treat the password as compromised regardless.
 1. Sign up at <https://neon.com> and create a project.
    - Region: **AWS eu-central-1 (Frankfurt)** — same region as the Render service.
    - Database name: `meet2be`.
-2. On the project dashboard open **Connection details** and switch the snippet
-   type to **Java / JDBC**. Also turn **Connection pooling OFF** — Hibernate
-   holds its own pool, and Neon's pgBouncer endpoint breaks prepared statements.
-3. You get something shaped like:
+2. On the project dashboard open **Connection details** and turn **Connection
+   pooling OFF** — Hibernate holds its own pool, and Neon's pgBouncer endpoint
+   breaks prepared statements.
+3. **Do not paste the string the copy button gives you.** Neon's default is a
+   libpq/psql URI with the credentials inside it:
 
    ```
-   jdbc:postgresql://ep-cool-name-123456.eu-central-1.aws.neon.tech/meet2be?sslmode=require
+   ✗ postgresql://neondb_owner:npg_xxxxx@ep-cool-name-123456.eu-central-1.aws.neon.tech/meet2be?sslmode=require&channel_binding=require
    ```
 
-   Keep the host string, the username, and the password — you need all three in
-   step 2. `sslmode=require` is mandatory; Neon refuses plaintext connections.
+   JDBC has no such syntax. pgjdbc reads everything after the first `:` in the
+   authority as the **port**, fails to parse it, and reports
+   `Driver org.postgresql.Driver claims to not accept jdbcUrl`. The context
+   never starts and the container exits 1 with no Spring banner.
+
+   Take the host and database only, and put the credentials in their own
+   variables:
+
+   ```
+   ✓ DB_URL      = jdbc:postgresql://ep-cool-name-123456.eu-central-1.aws.neon.tech/meet2be?sslmode=require
+     DB_USER     = neondb_owner
+     DB_PASSWORD = npg_xxxxx
+   ```
+
+   `sslmode=require` is mandatory — Neon refuses plaintext connections. Drop
+   `channel_binding`; it is a libpq parameter that pgjdbc ignores (the JDBC
+   spelling is `channelBinding`, and `sslmode=require` already covers you).
 
 Tables are created automatically on first boot (`ddl-auto: update`).
 
@@ -110,7 +126,17 @@ than configuration.
 
    Vite inlines `VITE_*` at build time, so this must exist *before* the build —
    changing it later requires a redeploy, not just a restart.
-4. Deploy. Note the resulting domain, e.g. `https://meet2be.vercel.app`.
+4. Deploy, then open **Domains** and take the **production** domain — the stable
+   `<project>.vercel.app`, not the long per-deployment URL shown right after a
+   build (`project-u1izh-o01x954vq-….vercel.app`). Two reasons:
+
+   - Vercel mints a new per-deployment URL on **every push**, so pinning CORS to
+     one breaks the next time you deploy.
+   - Preview deployments have **Deployment Protection** on by default: they
+     302 to `vercel.com/sso-api` and only load for someone signed into your
+     Vercel account. Production `.vercel.app` domains are public.
+
+   To make preview URLs public too: Settings → Deployment Protection → disable.
 5. Go back to Render → `meet2be-api` → **Environment** and correct:
 
    ```
@@ -142,6 +168,21 @@ The very first request after 15 minutes of silence takes **30–60 seconds** —
 Render is cold-starting the container and the JVM. Subsequent requests are fast.
 
 ---
+
+## Troubleshooting
+
+Render truncates the tail of a crashed container's log, so the useful lines are
+usually *above* what you first see. Open the deploy and scroll up to the first
+`Caused by:`.
+
+| Symptom | Cause |
+|---|---|
+| Exits 1 straight after `Picked up JAVA_TOOL_OPTIONS`, no Spring banner | The context failed before logging started — almost always `DB_URL`. Look for `claims to not accept jdbcUrl` (credentials embedded in the URL, see step 1) or `invalid port number`. |
+| `password authentication failed for user '...'` | `DB_USER` / `DB_PASSWORD` do not match Neon. The URL itself is fine if you got this far. |
+| `Unable to determine Dialect without JDBC metadata` | A red herring — Hibernate could not get *any* connection. The real error is the `Caused by:` above it. |
+| Health check fails but the app logs look healthy | Something is reporting `DOWN` at `/actuator/health`. Set `MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always` temporarily and curl it to see which component. |
+| Exits 137 | Out of memory — the 512 MB cap. Usually slide rendering; lower `MAX_UPLOAD_SIZE`. |
+| Frontend loads but every API call fails CORS | `CORS_ORIGINS` does not exactly match the Vercel origin (step 4). |
 
 ## Known limits of this setup
 

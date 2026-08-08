@@ -112,15 +112,98 @@
 .deck-preview img {
   display: block;
   width: 100%;
+  /* Capped against the viewport, not the intrinsic page size. A portrait slide
+     rendered at 110 DPI is ~1210px tall and would otherwise push the slide
+     controls out of .op-panel-body's scroll box on every single slide. */
+  max-height: 45vh;
   height: auto;
+  object-fit: contain;
 }
 
 .deck-controls {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   gap: var(--space-4);
   margin-bottom: var(--space-3);
+  /* Keeps prev/next reachable even when a tall deck list has been scrolled. */
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding: var(--space-2) 0;
+  background: var(--color-surface);
+}
+
+.deck-fullscreen-open {
+  gap: var(--space-2);
+}
+
+/* ---------- Presenting full screen ---------- */
+
+.deck-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--color-ink);
+}
+
+.deck-fullscreen-slide {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.deck-fullscreen-bar,
+.deck-fullscreen-hint {
+  flex: 0 0 auto;
+}
+
+.deck-fullscreen-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.deck-fullscreen-position {
+  color: var(--color-bg);
+  font-size: var(--fs-mono);
+  letter-spacing: var(--ls-mono);
+}
+
+.deck-fullscreen-btn {
+  color: var(--color-bg);
+}
+
+.deck-fullscreen-btn:hover:not(:disabled) {
+  background: var(--color-surface-on-dark);
+  color: var(--color-bg);
+}
+
+.deck-fullscreen-btn:disabled {
+  color: var(--color-ink-faint-on-dark);
+}
+
+.deck-fullscreen-hint {
+  margin: 0;
+  font-size: var(--fs-small);
+  /* The light-mode faint ink fails contrast once the surface flips to ink. */
+  color: var(--color-ink-faint-on-dark);
+}
+
+@media (max-width: 640px) {
+  .deck-preview img {
+    max-height: 38vh;
+  }
 }
 
 .deck-position {

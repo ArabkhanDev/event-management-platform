@@ -6,9 +6,13 @@ spring:
   application:
     name: meet2be-backend
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/meet2be}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    # JDBC URLs carry no credentials: pgjdbc reads everything after the first
+    # ':' in the authority as the port, so a libpq-style "user:pass@host" URL
+    # fails to parse and the driver is never selected. Host and database only —
+    # the credentials belong in DB_USER / DB_PASSWORD.
+    url: ${DB_URL:jdbc:postgresql://ep-super-union-b2nsmbal.c-6.eu-central-1.aws.neon.tech/meet2be?sslmode=require}
+    username: ${DB_USER:neondb_owner}
+    password: ${DB_PASSWORD:npg_HdA5zreLiQm0}
     driver-class-name: org.postgresql.Driver
     hikari:
       # Serverless Postgres (Neon) caps concurrent connections well below the
