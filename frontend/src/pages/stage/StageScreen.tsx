@@ -16,7 +16,7 @@ export default function StageScreen() {
     if (!sessionId) return;
     let cancelled = false;
     api
-      .get<StageState>(`/public/sessions/${sessionId}/stage-state`, { auth: false })
+      .get<StageState>(`/public/sessions/${sessionId}/stage-state`)
       .then((res) => {
         if (!cancelled) setState(res);
       })

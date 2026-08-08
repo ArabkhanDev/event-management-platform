@@ -14,6 +14,7 @@ import com.meet2be.model.enums.PresentationStatus;
 import com.meet2be.model.request.UpdatePresentationRequest;
 import com.meet2be.service.EventBroadcaster;
 import com.meet2be.service.PresentationService;
+import com.meet2be.service.SessionAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
@@ -44,6 +45,7 @@ public class PresentationServiceHandler implements PresentationService {
     private final PresentationSlideRepository slideRepository;
     private final SessionRepository sessionRepository;
     private final EventBroadcaster eventBroadcaster;
+    private final SessionAccessService sessionAccessService;
 
     @Override
     @Transactional
@@ -203,6 +205,7 @@ public class PresentationServiceHandler implements PresentationService {
     @Override
     @Transactional(readOnly = true)
     public PresentationDto getActiveForSession(Long sessionId) {
+        sessionAccessService.requireReadable(sessionId);
         return presentationRepository.findFirstBySessionIdAndStatus(sessionId, PresentationStatus.ACTIVE)
                 .map(PresentationDto::from)
                 .orElse(null);
@@ -211,6 +214,10 @@ public class PresentationServiceHandler implements PresentationService {
     @Override
     @Transactional(readOnly = true)
     public byte[] getSlideImage(Long presentationId, int slideNumber) {
+        Presentation presentation = presentationRepository.findById(presentationId)
+                .orElseThrow(() -> ApiException.notFound("error.presentation.notFound"));
+        sessionAccessService.requireReadable(presentation.getSession().getId());
+
         return slideRepository.findByPresentationIdAndSlideNumber(presentationId, slideNumber)
                 .map(PresentationSlide::getImageData)
                 .orElseThrow(() -> ApiException.notFound("error.presentation.slideNotFound"));

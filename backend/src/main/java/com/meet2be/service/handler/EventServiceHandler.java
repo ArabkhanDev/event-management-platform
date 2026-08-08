@@ -11,6 +11,7 @@ import com.meet2be.model.request.UpdateEventRequest;
 import com.meet2be.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,6 +100,18 @@ public class EventServiceHandler implements EventService {
     public Event getByJoinCode(String joinCode) {
         return eventRepository.findByJoinCode(joinCode)
                 .orElseThrow(() -> ApiException.notFound("error.event.notFound"));
+    }
+
+    @Override
+    public Event getJoinableByJoinCode(String joinCode) {
+        Event event = getByJoinCode(joinCode);
+
+        if (event.getStatus() == EventStatus.DRAFT) {
+            log.warn("ActionLog.getJoinableByJoinCode : Rejected join of a draft event, eventId={}", event.getId());
+            throw ApiException.of(HttpStatus.FORBIDDEN, "EVENT_NOT_STARTED", "error.access.eventNotStarted");
+        }
+
+        return event;
     }
 
     @Override

@@ -20,5 +20,12 @@ public interface EventService {
 
     Event getByJoinCode(String joinCode);
 
+    /**
+     * Join-code lookup for attendees. Rejects events that are still drafts, so
+     * a code shared or guessed early exposes nothing until the organiser goes
+     * live. Ended events resolve, since results stay viewable afterwards.
+     */
+    Event getJoinableByJoinCode(String joinCode);
+
     void requireOwner(Event event, Long requesterId);
 }

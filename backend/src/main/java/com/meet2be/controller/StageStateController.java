@@ -16,6 +16,6 @@ public class StageStateController {
 
     @GetMapping("/api/public/sessions/{id}/stage-state")
     public ResponseEntity<StageStateDto> getStageState(@PathVariable Long id) {
-        return ResponseEntity.ok(stageStateService.buildStageState(id));
+        return ResponseEntity.ok(stageStateService.getPublicStageState(id));
     }
 }

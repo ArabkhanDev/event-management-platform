@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import "../../styles/attendee.css";
-import { api, API_BASE, ApiError } from "../../lib/api";
+import { api, API_BASE, ApiError, accessCodeOf, type AccessErrorCode } from "../../lib/api";
 import { getVoterToken } from "../../lib/voterToken";
 import { useSessionSocket } from "../../lib/ws";
 import LanguageSwitcher from "../../components/shared/LanguageSwitcher";
@@ -85,6 +85,7 @@ export default function AttendeeSession() {
   const [activeGame, setActiveGame] = useState<GameQuestionDto | null>(null);
   const [leaderboard, setLeaderboard] = useState<SessionLeaderboardDto | null>(null);
   const [presentation, setPresentation] = useState<PresentationDto | null>(null);
+  const [accessBlock, setAccessBlock] = useState<AccessErrorCode | null>(null);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -92,9 +93,15 @@ export default function AttendeeSession() {
     api
       .get<StageState>(`/public/sessions/${sessionId}/stage-state`, { auth: false })
       .then((res) => {
-        if (!cancelled) setStageState(res);
+        if (cancelled) return;
+        setStageState(res);
+        setAccessBlock(null);
       })
-      .catch(() => {});
+      // Stage state is the one call every attendee makes, so it stands in for
+      // the whole session's availability.
+      .catch((err) => {
+        if (!cancelled) setAccessBlock(accessCodeOf(err));
+      });
     api
       .get<GameQuestionDto | undefined>(`/public/sessions/${sessionId}/active-game`, { auth: false })
       .then((res) => {
@@ -136,6 +143,34 @@ export default function AttendeeSession() {
 
   const activePoll = stageState?.poll ?? null;
 
+  // The session is over but still viewable: results stay, submissions close.
+  // Arrives over the socket too, so a phone already in the room switches to
+  // read-only the moment the organiser ends the talk.
+  const readOnly = stageState?.accessState === "READ_ONLY";
+
+  if (accessBlock) {
+    return (
+      <div className="attendee-shell">
+        <div className="attendee-topbar">
+          <Link to="/" className="nav-logo">
+            <span className="nav-logo-mark" aria-hidden="true" />
+            meet2be
+          </Link>
+          <LanguageSwitcher />
+        </div>
+        <main className="attendee-main">
+          <div className="join-hero">
+            <h2>{t(`attendee.access.${accessBlock}.heading`)}</h2>
+            <p>{t(`attendee.access.${accessBlock}.body`)}</p>
+          </div>
+          <Link to="/join" className="btn btn-primary btn-block">
+            {t("attendee.access.backToJoin")}
+          </Link>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="attendee-shell">
       <div className="attendee-topbar">
@@ -146,6 +181,11 @@ export default function AttendeeSession() {
         <LanguageSwitcher />
       </div>
       <main className="attendee-main">
+        {readOnly && (
+          <p className="att-readonly-banner" role="status">
+            {t("attendee.access.readOnlyNotice")}
+          </p>
+        )}
         <div className="att-tabs">
           <button className={`att-tab${tab === "ask" ? " active" : ""}`} onClick={() => setTab("ask")}>
             {t("attendee.session.tabAsk")}
@@ -169,17 +209,17 @@ export default function AttendeeSession() {
           )}
         </div>
 
-        {tab === "ask" && sessionId && <AskTab sessionId={sessionId} />}
-        {tab === "vote" && <VoteTab poll={activePoll} />}
-        {tab === "game" && <GameTab question={activeGame} leaderboard={leaderboard} />}
+        {tab === "ask" && sessionId && <AskTab sessionId={sessionId} readOnly={readOnly} />}
+        {tab === "vote" && <VoteTab poll={activePoll} readOnly={readOnly} />}
+        {tab === "game" && <GameTab question={activeGame} leaderboard={leaderboard} readOnly={readOnly} />}
         {tab === "slides" && <SlidesTab presentation={presentation} />}
-        {tab === "feedback" && survey && <FeedbackTab survey={survey} />}
+        {tab === "feedback" && survey && <FeedbackTab survey={survey} readOnly={readOnly} />}
       </main>
     </div>
   );
 }
 
-function AskTab({ sessionId }: { sessionId: string }) {
+function AskTab({ sessionId, readOnly }: { sessionId: string; readOnly: boolean }) {
   const { t } = useTranslation();
   const [authorName, setAuthorName] = useState("");
   const [body, setBody] = useState("");
@@ -213,31 +253,39 @@ function AskTab({ sessionId }: { sessionId: string }) {
         <p className="eyebrow">{t("attendee.session.ask.eyebrow")}</p>
         <h3>{t("attendee.session.ask.heading")}</h3>
       </div>
-      <form onSubmit={onSubmit}>
-        {error && (
-          <p className="form-error" role="alert">
-            {error}
-          </p>
-        )}
-        <div className="field">
-          <label htmlFor="author">{t("attendee.session.ask.nameLabel")}</label>
-          <input id="author" className="input" value={authorName} onChange={(e) => setAuthorName(e.target.value)} />
+      {/* A closed session gets no form at all: a disabled one still reads as
+          "type here", and the submission would be rejected anyway. */}
+      {readOnly ? (
+        <div className="empty-state">
+          <p>{t("attendee.access.askClosed")}</p>
         </div>
-        <div className="field">
-          <label htmlFor="question">{t("attendee.session.ask.questionLabel")}</label>
-          <textarea
-            id="question"
-            className="input"
-            required
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder={t("attendee.session.ask.questionPlaceholder")}
-          />
-        </div>
-        <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-          {submitting ? t("attendee.session.ask.sending") : t("attendee.session.ask.send")}
-        </button>
-      </form>
+      ) : (
+        <form onSubmit={onSubmit}>
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="field">
+            <label htmlFor="author">{t("attendee.session.ask.nameLabel")}</label>
+            <input id="author" className="input" value={authorName} onChange={(e) => setAuthorName(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="question">{t("attendee.session.ask.questionLabel")}</label>
+            <textarea
+              id="question"
+              className="input"
+              required
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder={t("attendee.session.ask.questionPlaceholder")}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+            {submitting ? t("attendee.session.ask.sending") : t("attendee.session.ask.send")}
+          </button>
+        </form>
+      )}
 
       {sent.length > 0 && (
         <div style={{ marginTop: "var(--space-6)" }}>
@@ -255,7 +303,7 @@ function AskTab({ sessionId }: { sessionId: string }) {
   );
 }
 
-function VoteTab({ poll }: { poll: PollDto | null }) {
+function VoteTab({ poll, readOnly }: { poll: PollDto | null; readOnly: boolean }) {
   const { t } = useTranslation();
   const [localPoll, setLocalPoll] = useState<PollDto | null>(poll);
   const [voting, setVoting] = useState(false);
@@ -322,7 +370,7 @@ function VoteTab({ poll }: { poll: PollDto | null }) {
 
       {canVote
         ? localPoll.options.map((opt) => (
-            <button key={opt.id} className="vote-option" disabled={voting} onClick={() => vote(opt.id)}>
+            <button key={opt.id} className="vote-option" disabled={voting || readOnly} onClick={() => vote(opt.id)}>
               {opt.label}
             </button>
           ))
@@ -347,7 +395,9 @@ function VoteTab({ poll }: { poll: PollDto | null }) {
 function GameTab({
   question,
   leaderboard,
+  readOnly,
 }: {
+  readOnly: boolean;
   question: GameQuestionDto | null;
   leaderboard: SessionLeaderboardDto | null;
 }) {
@@ -437,7 +487,7 @@ function GameTab({
 
       {canAnswer
         ? localQuestion.options.map((opt) => (
-            <button key={opt.id} className="vote-option" disabled={answering} onClick={() => answer(opt.id)}>
+            <button key={opt.id} className="vote-option" disabled={answering || readOnly} onClick={() => answer(opt.id)}>
               {opt.label}
             </button>
           ))
@@ -532,7 +582,7 @@ function SlidesTab({ presentation }: { presentation: PresentationDto | null }) {
   );
 }
 
-function FeedbackTab({ survey }: { survey: SurveyDto }) {
+function FeedbackTab({ survey, readOnly }: { survey: SurveyDto; readOnly: boolean }) {
   const { t } = useTranslation();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -635,7 +685,7 @@ function FeedbackTab({ survey }: { survey: SurveyDto }) {
             )}
           </div>
         ))}
-        <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+        <button type="submit" className="btn btn-primary btn-block" disabled={submitting || readOnly}>
           {submitting ? t("attendee.session.feedback.submitting") : t("attendee.session.feedback.submit")}
         </button>
       </form>

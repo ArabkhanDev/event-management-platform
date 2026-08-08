@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { API_BASE } from "../../lib/api";
+import { useAuthedImage } from "../../hooks/useAuthedImage";
 import ChevronIcon from "../shared/ChevronIcon";
 import type { PresentationDto } from "../../types/api";
 
@@ -25,6 +25,9 @@ export default function DeckFullscreen({
 }) {
   const { t } = useTranslation();
   const overlayRef = useRef<HTMLDivElement>(null);
+  const slideUrl = useAuthedImage(
+    `/public/presentations/${presentation.id}/slides/${presentation.currentSlide}`,
+  );
 
   // Native fullscreen is best-effort: browsers reject requestFullscreen when it
   // is not tied to a user gesture, and some kiosk setups disable it outright.
@@ -80,14 +83,16 @@ export default function DeckFullscreen({
       aria-label={t("operator.presentationPanel.fullscreenLabel")}
       tabIndex={-1}
     >
-      <img
-        className="deck-fullscreen-slide"
-        src={`${API_BASE}/public/presentations/${presentation.id}/slides/${presentation.currentSlide}`}
-        alt={t("attendee.session.slides.slideAlt", {
-          current: presentation.currentSlide,
-          total: presentation.slideCount,
-        })}
-      />
+      {slideUrl && (
+        <img
+          className="deck-fullscreen-slide"
+          src={slideUrl}
+          alt={t("attendee.session.slides.slideAlt", {
+            current: presentation.currentSlide,
+            total: presentation.slideCount,
+          })}
+        />
+      )}
 
       <div className="deck-fullscreen-bar">
         <button

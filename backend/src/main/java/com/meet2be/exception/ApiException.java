@@ -11,10 +11,28 @@ public class ApiException extends RuntimeException {
     private final HttpStatus status;
     private final Object[] args;
 
+    /**
+     * Optional stable identifier for cases the client must branch on rather
+     * than merely display — e.g. telling "not started yet" apart from "ended"
+     * so the attendee app can show the right screen. Null for the majority of
+     * errors, where the localised message is the whole payload.
+     */
+    private final String code;
+
     public ApiException(HttpStatus status, String messageKey, Object... args) {
+        this(status, null, messageKey, args);
+    }
+
+    public ApiException(HttpStatus status, String code, String messageKey, Object... args) {
         super(messageKey);
         this.status = status;
+        this.code = code;
         this.args = args;
+    }
+
+    /** Factory for the coded variant; the no-code helpers below stay unchanged. */
+    public static ApiException of(HttpStatus status, String code, String messageKey, Object... args) {
+        return new ApiException(status, code, messageKey, args);
     }
 
     public static ApiException notFound(String messageKey, Object... args) {
@@ -39,6 +57,10 @@ public class ApiException extends RuntimeException {
 
     public HttpStatus getStatus() {
         return status;
+    }
+
+    public String getCode() {
+        return code;
     }
 
     public Object[] getArgs() {

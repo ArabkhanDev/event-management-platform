@@ -83,6 +83,11 @@ public class SessionServiceHandler implements SessionService {
 
         boolean stageModeChanged = request.getStageMode() != null && request.getStageMode() != session.getStageMode();
 
+        // Status drives what attendees are allowed to do, and it rides along in
+        // the stage state — so ending a talk has to reach the phones already in
+        // the room, not just the next visitor.
+        boolean statusChanged = request.getStatus() != null && request.getStatus() != session.getStatus();
+
         if (request.getTitle() != null) {
             if (request.getTitle().isBlank()) {
                 throw ApiException.badRequest("error.session.titleBlank");
@@ -113,6 +118,12 @@ public class SessionServiceHandler implements SessionService {
         if (stageModeChanged) {
             log.info("ActionLog.update : Session stage mode changed, sessionId={}, stageMode={}",
                     session.getId(), session.getStageMode());
+        }
+        if (statusChanged) {
+            log.info("ActionLog.update : Session status changed, sessionId={}, status={}",
+                    session.getId(), session.getStatus());
+        }
+        if (stageModeChanged || statusChanged) {
             stageStateService.broadcastStageState(session.getId());
         }
 

@@ -202,10 +202,18 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--space-4);
-  text-decoration: none;
   color: var(--color-ink);
   flex-wrap: wrap;
   transition: background var(--dur) var(--ease);
+}
+
+/* The row holds a status toggle now, so only the title area navigates —
+   buttons cannot live inside an anchor. */
+.session-row-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
 }
 
 .session-row:hover {

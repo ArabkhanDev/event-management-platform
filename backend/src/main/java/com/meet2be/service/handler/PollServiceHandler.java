@@ -18,6 +18,7 @@ import com.meet2be.model.constants.WsMessageType;
 import com.meet2be.model.request.CreatePollRequest;
 import com.meet2be.service.EventBroadcaster;
 import com.meet2be.service.PollService;
+import com.meet2be.service.SessionAccessService;
 import com.meet2be.service.StageStateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,7 @@ public class PollServiceHandler implements PollService {
     private final SessionRepository sessionRepository;
     private final EventBroadcaster eventBroadcaster;
     private final StageStateService stageStateService;
+    private final SessionAccessService sessionAccessService;
 
     @Override
     public Poll create(Long sessionId, Long requesterId, CreatePollRequest request) {
@@ -129,6 +131,7 @@ public class PollServiceHandler implements PollService {
 
         Poll poll = pollRepository.findById(pollId)
                 .orElseThrow(() -> ApiException.notFound("error.poll.notFound"));
+        sessionAccessService.requireInteractive(poll.getSession().getId());
 
         PollOption option = pollOptionRepository.findById(optionId)
                 .orElseThrow(() -> ApiException.notFound("error.poll.optionNotFound"));
@@ -163,6 +166,7 @@ public class PollServiceHandler implements PollService {
     public PollDto getResults(Long pollId) {
         Poll poll = pollRepository.findById(pollId)
                 .orElseThrow(() -> ApiException.notFound("error.poll.notFound"));
+        sessionAccessService.requireReadable(poll.getSession().getId());
         return toDto(poll);
     }
 

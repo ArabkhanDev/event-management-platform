@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import "../../styles/dashboard.css";
 import DashboardNav from "../../components/layout/DashboardNav";
 import { api, ApiError } from "../../lib/api";
-import type { EventDto, EventStatus, SessionDto } from "../../types/api";
+import type { EventDto, EventStatus, SessionDto, SessionStatus } from "../../types/api";
 
 function CopyCodeButton({ code }: { code: string }) {
   const { t } = useTranslation();
@@ -37,6 +37,14 @@ function CopyCodeButton({ code }: { code: string }) {
 }
 
 const STATUS_OPTIONS: EventStatus[] = ["DRAFT", "LIVE", "ENDED"];
+const SESSION_STATUS_OPTIONS: SessionStatus[] = ["SCHEDULED", "LIVE", "ENDED"];
+
+/** Reuses the event toggle's colour classes: scheduled reads as draft. */
+const SESSION_STATUS_CLASS: Record<SessionStatus, string> = {
+  SCHEDULED: "status-draft",
+  LIVE: "status-live",
+  ENDED: "status-ended",
+};
 
 export default function EventDetail() {
   const { t } = useTranslation();
@@ -54,6 +62,16 @@ export default function EventDetail() {
     onSuccess: (updated) => {
       queryClient.setQueryData(["event", eventId], updated);
       queryClient.invalidateQueries({ queryKey: ["events"] });
+    },
+  });
+
+  // Attendee access is gated on this, so it is the control that actually opens
+  // a talk up rather than a cosmetic label.
+  const updateSessionStatus = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: SessionStatus }) =>
+      api.patch<SessionDto>(`/sessions/${id}`, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event", eventId] });
     },
   });
 
@@ -178,15 +196,28 @@ export default function EventDetail() {
                 {event.sessions.map((s, i) => (
                   <div key={s.id}>
                     {i > 0 && <hr className="rule" />}
-                    <Link to={`/operator/${s.id}`} className="session-row">
-                      <span>
+                    <div className="session-row">
+                      <Link to={`/operator/${s.id}`} className="session-row-main">
                         <strong style={{ display: "block" }}>{s.title}</strong>
                         <span className="session-row-meta">
                           {s.speakerName} · {s.hallName}
                         </span>
-                      </span>
-                      <span className={`badge${s.status === "LIVE" ? " badge-live" : ""}`}>{t(`common.sessionStatus.${s.status}`)}</span>
-                    </Link>
+                      </Link>
+                      <div className="status-toggle" role="group" aria-label={t("dashboard.eventDetail.sessionStatusLabel")}>
+                        {SESSION_STATUS_OPTIONS.map((st) => (
+                          <button
+                            key={st}
+                            type="button"
+                            className={`status-toggle-btn ${SESSION_STATUS_CLASS[st]}${s.status === st ? " active" : ""}`}
+                            aria-pressed={s.status === st}
+                            disabled={updateSessionStatus.isPending || s.status === st}
+                            onClick={() => updateSessionStatus.mutate({ id: s.id, status: st })}
+                          >
+                            {t(`common.sessionStatus.${st}`)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

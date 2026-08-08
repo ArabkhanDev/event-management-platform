@@ -20,11 +20,30 @@ function getLanguage(): string {
 
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  /**
+   * Stable reason code from the backend, present only where the client has to
+   * branch rather than just display — e.g. EVENT_NOT_STARTED vs EVENT_ENDED.
+   */
+  code?: string;
+  constructor(status: number, message: string, code?: string) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.code = code;
   }
+}
+
+/** Reasons an attendee can be turned away from a session. */
+export type AccessErrorCode =
+  | "EVENT_NOT_STARTED"
+  | "SESSION_NOT_STARTED"
+  | "EVENT_ENDED"
+  | "SESSION_ENDED";
+
+export function accessCodeOf(error: unknown): AccessErrorCode | null {
+  if (!(error instanceof ApiError) || !error.code) return null;
+  const known: AccessErrorCode[] = ["EVENT_NOT_STARTED", "SESSION_NOT_STARTED", "EVENT_ENDED", "SESSION_ENDED"];
+  return known.includes(error.code as AccessErrorCode) ? (error.code as AccessErrorCode) : null;
 }
 
 function getToken(): string | null {
@@ -85,7 +104,11 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       (data && typeof data === "object" && "message" in data && typeof (data as { message?: unknown }).message === "string"
         ? (data as { message: string }).message
         : null) || res.statusText || `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
+    const code =
+      data && typeof data === "object" && "code" in data && typeof (data as { code?: unknown }).code === "string"
+        ? (data as { code: string }).code
+        : undefined;
+    throw new ApiError(res.status, message, code);
   }
 
   return data as T;

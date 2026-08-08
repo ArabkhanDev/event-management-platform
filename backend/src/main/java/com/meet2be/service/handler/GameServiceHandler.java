@@ -20,6 +20,7 @@ import com.meet2be.model.request.CreateGameQuestionRequest;
 import com.meet2be.service.EventBroadcaster;
 import com.meet2be.service.GameService;
 import com.meet2be.service.LeaderboardService;
+import com.meet2be.service.SessionAccessService;
 import com.meet2be.service.StageStateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,7 @@ public class GameServiceHandler implements GameService {
     private final EventBroadcaster eventBroadcaster;
     private final StageStateService stageStateService;
     private final LeaderboardService leaderboardService;
+    private final SessionAccessService sessionAccessService;
 
     @Override
     public GameQuestion create(Long sessionId, Long requesterId, CreateGameQuestionRequest request) {
@@ -147,6 +149,7 @@ public class GameServiceHandler implements GameService {
 
         GameQuestion question = gameQuestionRepository.findById(questionId)
                 .orElseThrow(() -> ApiException.notFound("error.game.notFound"));
+        sessionAccessService.requireInteractive(question.getSession().getId());
 
         GameOption option = gameOptionRepository.findById(optionId)
                 .orElseThrow(() -> ApiException.notFound("error.game.optionNotFound"));
@@ -186,6 +189,7 @@ public class GameServiceHandler implements GameService {
     public GameQuestionDto getResults(Long questionId) {
         GameQuestion question = gameQuestionRepository.findById(questionId)
                 .orElseThrow(() -> ApiException.notFound("error.game.notFound"));
+        sessionAccessService.requireReadable(question.getSession().getId());
         return toDto(question);
     }
 
@@ -199,11 +203,13 @@ public class GameServiceHandler implements GameService {
 
     @Override
     public SessionLeaderboardDto getLeaderboard(Long sessionId) {
+        sessionAccessService.requireReadable(sessionId);
         return leaderboardService.buildLeaderboard(sessionId);
     }
 
     @Override
     public GameQuestionDto getActiveForSession(Long sessionId) {
+        sessionAccessService.requireReadable(sessionId);
         return gameQuestionRepository.findFirstBySessionIdAndStatus(sessionId, GameStatus.ACTIVE)
                 .map(this::toDto)
                 .orElse(null);

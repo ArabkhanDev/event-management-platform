@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../../styles/attendee.css";
-import { api, ApiError } from "../../lib/api";
+import { api, ApiError, accessCodeOf, type AccessErrorCode } from "../../lib/api";
 import { getVoterToken } from "../../lib/voterToken";
 import LanguageSwitcher from "../../components/shared/LanguageSwitcher";
 import type { JoinEventResponse } from "../../types/api";
@@ -14,6 +14,7 @@ export default function JoinEvent() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [blocked, setBlocked] = useState<AccessErrorCode | null>(null);
   const [result, setResult] = useState<JoinEventResponse | null>(null);
 
   async function onSubmit(e: FormEvent) {
@@ -21,6 +22,7 @@ export default function JoinEvent() {
     if (!code.trim()) return;
     setLoading(true);
     setError(null);
+    setBlocked(null);
     try {
       const res = await api.get<JoinEventResponse>(`/public/join/${encodeURIComponent(code.trim())}`, {
         auth: false,
@@ -37,7 +39,14 @@ export default function JoinEvent() {
       }
       setResult(res);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("attendee.join.fallbackError"));
+      // A code for an event that has not opened yet is not a typo — say so
+      // plainly instead of showing it as a lookup failure.
+      const code = accessCodeOf(err);
+      if (code) {
+        setBlocked(code);
+      } else {
+        setError(err instanceof ApiError ? err.message : t("attendee.join.fallbackError"));
+      }
     } finally {
       setLoading(false);
     }
@@ -53,7 +62,17 @@ export default function JoinEvent() {
         <LanguageSwitcher />
       </div>
       <main className="attendee-main">
-        {!result && (
+        {blocked && (
+          <div className="join-hero">
+            <h2>{t(`attendee.access.${blocked}.heading`)}</h2>
+            <p>{t(`attendee.access.${blocked}.body`)}</p>
+            <button type="button" className="btn btn-ghost" onClick={() => setBlocked(null)}>
+              {t("attendee.access.tryAnotherCode")}
+            </button>
+          </div>
+        )}
+
+        {!result && !blocked && (
           <>
             <div className="join-hero">
               <p className="eyebrow">{t("attendee.join.eyebrow")}</p>

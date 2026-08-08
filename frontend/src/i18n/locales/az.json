@@ -265,6 +265,7 @@
       "joinCodeHint": "İştirakçılar bunu /join ünvanında daxil edir",
       "emailCampaigns": "E-poçt kampaniyaları",
       "sessionsHeading": "Sessiyalar",
+      "sessionStatusLabel": "Sessiya statusu",
       "sessionsEmpty": "Hələ sessiya yoxdur. Operator Paneli almaq üçün bir dənə əlavə et.",
       "addSessionHeading": "Sessiya əlavə et",
       "addSessionError": "Sessiyanı yaratmaq mümkün olmadı.",
@@ -452,6 +453,16 @@
     "idleBody": "Növbəti sual və ya sorğu gözlənilir…"
   },
   "attendee": {
+    "access": {
+      "readOnlyNotice": "Bu sessiya başa çatıb — nəticələrə baxa bilərsiniz, yeni sual və səs qəbul edilmir.",
+      "askClosed": "Sual qəbulu bağlanıb, çünki bu sessiya başa çatıb.",
+      "backToJoin": "Kod ilə yenidən qoşul",
+      "tryAnotherCode": "Başqa kod yoxla",
+      "EVENT_NOT_STARTED": { "heading": "Bu tədbir hələ başlamayıb", "body": "Təşkilatçı tədbiri canlı edən kimi sual, sorğu və slaydlar burada görünəcək." },
+      "SESSION_NOT_STARTED": { "heading": "Bu sessiya hələ başlamayıb", "body": "Natiq səhnəyə çıxanda bu səhifə avtomatik açılacaq." },
+      "EVENT_ENDED": { "heading": "Bu tədbir başa çatıb", "body": "Yeni sual və səs qəbul edilmir. Nəticələr baxış üçün açıq qalır." },
+      "SESSION_ENDED": { "heading": "Bu sessiya başa çatıb", "body": "Yeni sual və səs qəbul edilmir. Nəticələr baxış üçün açıq qalır." }
+    },
     "join": {
       "eyebrow": "Tədbirə qoşul",
       "heading": "Tədbir kodunu daxil et",

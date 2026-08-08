@@ -19,6 +19,7 @@ import com.meet2be.model.enums.SurveyStatus;
 import com.meet2be.model.request.CreateSurveyQuestionRequest;
 import com.meet2be.model.request.CreateSurveyRequest;
 import com.meet2be.model.request.SubmitAnswerRequest;
+import com.meet2be.service.SessionAccessService;
 import com.meet2be.service.SurveyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ public class SurveyServiceHandler implements SurveyService {
     private final SurveyResponseRepository surveyResponseRepository;
     private final SurveyAnswerRepository surveyAnswerRepository;
     private final SessionRepository sessionRepository;
+    private final SessionAccessService sessionAccessService;
 
     @Override
     public Survey create(Long sessionId, Long requesterId, CreateSurveyRequest request) {
@@ -125,6 +127,7 @@ public class SurveyServiceHandler implements SurveyService {
 
     @Override
     public Survey getActiveForSession(Long sessionId) {
+        sessionAccessService.requireReadable(sessionId);
         return surveyRepository.findBySessionId(sessionId).stream()
                 .filter(s -> s.getStatus() == SurveyStatus.ACTIVE)
                 .findFirst()
@@ -138,6 +141,7 @@ public class SurveyServiceHandler implements SurveyService {
         }
         Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> ApiException.notFound("error.survey.notFound"));
+        sessionAccessService.requireInteractive(survey.getSession().getId());
 
         if (surveyResponseRepository.existsBySurveyIdAndVoterToken(surveyId, voterToken)) {
             throw ApiException.conflict("error.survey.alreadyResponded");

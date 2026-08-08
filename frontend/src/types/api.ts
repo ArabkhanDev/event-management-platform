@@ -186,11 +186,15 @@ export interface JoinEventResponse {
   sessions: SessionDto[];
 }
 
+export type SessionAccessState = "NOT_STARTED" | "OPEN" | "READ_ONLY";
+
 export interface StageState {
   stageMode: StageMode;
   question: QuestionDto | null;
   poll: PollDto | null;
   leaderboard: SessionLeaderboardDto | null;
+  /** What the attendee may do right now — READ_ONLY once the session ends. */
+  accessState: SessionAccessState;
 }
 
 export interface WsFrame<T = unknown> {

@@ -16,7 +16,19 @@ public class ErrorResponse {
     private String error;
     private String message;
 
+    /**
+     * Stable, non-localised identifier for clients that must branch on the
+     * reason rather than show it. Omitted from the payload when absent
+     * (Jackson is configured to drop nulls), so existing responses are
+     * byte-for-byte unchanged.
+     */
+    private String code;
+
     public static ErrorResponse of(int status, String error, String message) {
-        return new ErrorResponse(Instant.now(), status, error, message);
+        return of(status, error, message, null);
+    }
+
+    public static ErrorResponse of(int status, String error, String message, String code) {
+        return new ErrorResponse(Instant.now(), status, error, message, code);
     }
 }

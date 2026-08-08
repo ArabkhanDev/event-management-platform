@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
         logApiException(ex);
         String message = resolveMessage(ex.getMessage(), ex.getArgs());
         return ResponseEntity.status(ex.getStatus())
-                .body(ErrorResponse.of(ex.getStatus().value(), ex.getStatus().getReasonPhrase(), message));
+                .body(ErrorResponse.of(ex.getStatus().value(), ex.getStatus().getReasonPhrase(), message, ex.getCode()));
     }
 
     private void logApiException(ApiException ex) {

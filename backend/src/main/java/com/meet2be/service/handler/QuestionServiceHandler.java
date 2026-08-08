@@ -13,6 +13,7 @@ import com.meet2be.model.constants.WsMessageType;
 import com.meet2be.model.request.SubmitQuestionRequest;
 import com.meet2be.service.EventBroadcaster;
 import com.meet2be.service.QuestionService;
+import com.meet2be.service.SessionAccessService;
 import com.meet2be.service.StageStateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class QuestionServiceHandler implements QuestionService {
     private final SessionRepository sessionRepository;
     private final EventBroadcaster eventBroadcaster;
     private final StageStateService stageStateService;
+    private final SessionAccessService sessionAccessService;
 
     @Override
     public Question submit(Long sessionId, SubmitQuestionRequest request) {
@@ -38,8 +40,7 @@ public class QuestionServiceHandler implements QuestionService {
             throw ApiException.badRequest("error.common.bodyRequired");
         }
 
-        Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> ApiException.notFound("error.session.notFound"));
+        Session session = sessionAccessService.requireInteractive(sessionId);
 
         Question question = Question.builder()
                 .session(session)

@@ -59,13 +59,13 @@ export default function OperatorBoard() {
 
   const { data: initialLeaderboard } = useQuery({
     queryKey: ["leaderboard", sessionId],
-    queryFn: () => api.get<SessionLeaderboardDto>(`/public/sessions/${sessionId}/leaderboard`, { auth: false }),
+    queryFn: () => api.get<SessionLeaderboardDto>(`/public/sessions/${sessionId}/leaderboard`),
     enabled: !!sessionId,
   });
 
   const { data: initialStage } = useQuery({
     queryKey: ["stage-state", sessionId],
-    queryFn: () => api.get<StageState>(`/public/sessions/${sessionId}/stage-state`, { auth: false }),
+    queryFn: () => api.get<StageState>(`/public/sessions/${sessionId}/stage-state`),
     enabled: !!sessionId,
   });
 

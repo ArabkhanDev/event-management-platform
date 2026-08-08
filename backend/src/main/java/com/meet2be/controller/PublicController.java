@@ -23,7 +23,7 @@ public class PublicController {
 
     @GetMapping("/join/{joinCode}")
     public ResponseEntity<PublicJoinResponse> join(@PathVariable String joinCode) {
-        Event event = eventService.getByJoinCode(joinCode);
+        Event event = eventService.getJoinableByJoinCode(joinCode);
         var sessions = sessionService.listForEvent(event.getId()).stream()
                 .map(SessionDto::from)
                 .toList();

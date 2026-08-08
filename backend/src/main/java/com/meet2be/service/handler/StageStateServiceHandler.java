@@ -21,6 +21,7 @@ import com.meet2be.model.enums.StageMode;
 import com.meet2be.model.constants.WsMessageType;
 import com.meet2be.service.EventBroadcaster;
 import com.meet2be.service.LeaderboardService;
+import com.meet2be.service.SessionAccessService;
 import com.meet2be.service.StageStateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ public class StageStateServiceHandler implements StageStateService {
     private final PollVoteRepository pollVoteRepository;
     private final EventBroadcaster eventBroadcaster;
     private final LeaderboardService leaderboardService;
+    private final SessionAccessService sessionAccessService;
 
     @Override
     public StageStateDto buildStageState(Long sessionId) {
@@ -64,7 +66,15 @@ public class StageStateServiceHandler implements StageStateService {
                 ? leaderboardService.buildLeaderboard(sessionId)
                 : null;
 
-        return new StageStateDto(session.getStageMode(), questionDto, pollDto, leaderboard);
+        return new StageStateDto(session.getStageMode(), questionDto, pollDto, leaderboard,
+                sessionAccessService.resolve(session));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StageStateDto getPublicStageState(Long sessionId) {
+        sessionAccessService.requireReadable(sessionId);
+        return buildStageState(sessionId);
     }
 
     @Override

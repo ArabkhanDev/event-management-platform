@@ -273,6 +273,7 @@
       "joinCodeHint": "Attendees enter this at /join",
       "emailCampaigns": "Email campaigns",
       "sessionsHeading": "Sessions",
+      "sessionStatusLabel": "Session status",
       "sessionsEmpty": "No sessions yet. Add one to get an Operator Board.",
       "addSessionHeading": "Add a session",
       "addSessionError": "Could not create the session.",
@@ -467,6 +468,16 @@
     "idleBody": "Waiting for the next question or poll…"
   },
   "attendee": {
+    "access": {
+      "readOnlyNotice": "This session has ended — you can still view results, but new questions and votes are closed.",
+      "askClosed": "Questions are closed because this session has ended.",
+      "backToJoin": "Join with another code",
+      "tryAnotherCode": "Try another code",
+      "EVENT_NOT_STARTED": { "heading": "This event hasn't started yet", "body": "Questions, polls and slides will appear here as soon as the organiser goes live." },
+      "SESSION_NOT_STARTED": { "heading": "This session hasn't started yet", "body": "This page will open automatically once the speaker takes the stage." },
+      "EVENT_ENDED": { "heading": "This event has ended", "body": "New questions and votes are closed. Results stay available to view." },
+      "SESSION_ENDED": { "heading": "This session has ended", "body": "New questions and votes are closed. Results stay available to view." }
+    },
     "join": {
       "eyebrow": "Join an event",
       "heading": "Enter your event code",

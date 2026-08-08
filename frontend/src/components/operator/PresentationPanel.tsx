@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { api, API_BASE, ApiError } from "../../lib/api";
+import { api, ApiError } from "../../lib/api";
+import { useAuthedImage } from "../../hooks/useAuthedImage";
 import ChevronIcon from "../shared/ChevronIcon";
 import ExpandIcon from "../shared/ExpandIcon";
 import UploadIcon from "../shared/UploadIcon";
@@ -107,6 +108,12 @@ export default function PresentationPanel({
     inFlightSlideRef.current = 0;
   }, [active?.id]);
 
+  // Only the active deck renders a preview, so one loader at component level is
+  // enough — and hooks cannot be called from inside the list below.
+  const activeSlideUrl = useAuthedImage(
+    active ? `/public/presentations/${active.id}/slides/${active.currentSlide}` : null,
+  );
+
   function goToSlide(presentation: PresentationDto, slide: number) {
     if (slide < 1 || slide > presentation.slideCount) return;
     pendingSlideRef.current = slide;
@@ -211,10 +218,12 @@ export default function PresentationPanel({
               {isActive && (
                 <>
                   <div className="deck-preview">
-                    <img
-                      src={`${API_BASE}/public/presentations/${p.id}/slides/${p.currentSlide}`}
-                      alt={t("attendee.session.slides.slideAlt", { current: p.currentSlide, total: p.slideCount })}
-                    />
+                    {activeSlideUrl && (
+                      <img
+                        src={activeSlideUrl}
+                        alt={t("attendee.session.slides.slideAlt", { current: p.currentSlide, total: p.slideCount })}
+                      />
+                    )}
                   </div>
                   <div className="deck-controls">
                     <button
