@@ -1,0 +1,365 @@
+/* Plans / pricing page */
+
+.plan-hero {
+  text-align: center;
+  padding: var(--space-9) 0 var(--space-7);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.plan-hero .eyebrow {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.plan-hero .lede {
+  margin: 0 auto var(--space-6);
+  text-align: center;
+}
+
+.trust-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.trust-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-full);
+  color: var(--color-ink-soft);
+}
+
+.trust-chip .icon {
+  color: var(--color-success);
+}
+
+/* ---------- Comparison table ---------- */
+
+.compare-scroll {
+  overflow-x: auto;
+  border: var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.compare-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  background: var(--color-surface);
+}
+
+.compare-table caption {
+  text-align: left;
+  padding: var(--space-5) var(--space-5) 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  color: var(--color-ink-faint);
+}
+
+.compare-table th,
+.compare-table td {
+  padding: var(--space-4) var(--space-5);
+  text-align: center;
+  border-bottom: var(--border);
+}
+
+.compare-table thead th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-body-lg);
+  border-bottom: var(--border-strong);
+}
+
+.compare-table th[scope="row"] {
+  text-align: left;
+  font-weight: 500;
+  color: var(--color-ink-soft);
+}
+
+.compare-table tbody tr:last-child th,
+.compare-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.compare-table .check {
+  color: var(--color-success);
+  margin: 0 auto;
+}
+
+.compare-table .dash {
+  color: var(--color-line);
+}
+
+/* ---------- Pricing cards ---------- */
+
+.plan-cards {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .plan-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1180px) {
+  .plan-cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.plan-card {
+  position: relative;
+  border: var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+
+.plan-card.popular {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.plan-card-badge {
+  position: absolute;
+  top: -13px;
+  left: var(--space-6);
+  background: var(--color-primary);
+  color: var(--color-primary-ink);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.plan-card-name {
+  margin-bottom: var(--space-1);
+}
+
+.plan-card-tagline {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  color: var(--color-ink-faint);
+  margin-bottom: var(--space-4);
+}
+
+.plan-card-blurb {
+  font-size: var(--fs-small);
+  margin-bottom: var(--space-5);
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.plan-price .amount {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-display-md);
+  letter-spacing: var(--ls-tight);
+}
+
+.plan-price .unit {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  color: var(--color-ink-faint);
+}
+
+.plan-modules {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: var(--space-3);
+}
+
+.plan-feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  flex: 1;
+}
+
+.plan-feature-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--fs-small);
+  color: var(--color-ink-soft);
+}
+
+.plan-feature-list .icon {
+  color: var(--color-success);
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+/* ---------- Included / credits / module rows ---------- */
+
+.plan-included-row,
+.plan-credit-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-small);
+  margin-bottom: var(--space-3);
+}
+
+.plan-included-row {
+  background: var(--color-success-soft);
+  font-weight: 600;
+}
+
+.plan-included-row .icon {
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+
+.plan-credit-row {
+  border: var(--border);
+}
+
+.plan-credit-row .icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.plan-rule {
+  border: none;
+  border-top: var(--border);
+  margin: var(--space-4) 0;
+}
+
+.plan-modules-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.plan-modules-head .label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+}
+
+.plan-modules-count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  font-weight: 600;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.plan-inherit-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
+.plan-module-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  flex: 1;
+}
+
+.plan-module-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--fs-small);
+  color: var(--color-ink-soft);
+}
+
+.plan-module-list .icon {
+  color: var(--color-success);
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.plan-discount-note {
+  text-align: center;
+  font-size: var(--fs-small);
+  color: var(--color-ink-faint);
+  margin-top: var(--space-6);
+}
+
+/* ---------- FAQ ---------- */
+
+.faq-list {
+  max-width: 760px;
+  margin: 0 auto;
+  border-top: var(--border);
+}
+
+.faq-item {
+  border-bottom: var(--border);
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-body-lg);
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary .chevron {
+  flex-shrink: 0;
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.faq-item[open] summary .chevron {
+  transform: rotate(180deg);
+}
+
+.faq-item .faq-answer {
+  padding: 0 0 var(--space-5);
+  max-width: 65ch;
+}

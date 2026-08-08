@@ -1,0 +1,103 @@
+:root {
+  /* ============ Color — surfaces & text ============ */
+  --color-bg: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #eef1f6;
+
+  --color-ink: #0b1220;
+  --color-ink-soft: #47506b; /* 7.5:1 on --color-bg */
+  --color-ink-faint: #5b6480; /* 5.5:1 on --color-bg, 5.9:1 on --color-surface */
+
+  --color-line: #dfe3ec;
+  --color-line-strong: #0b1220;
+
+  /* ============ Color — semantic accents (verified WCAG AA, 4.5:1+) ============ */
+  --color-primary: #2952e3; /* interactive / CTA — never reused for status */
+  --color-primary-ink: #ffffff;
+  --color-primary-soft: #eef1fe;
+
+  --color-live: #dc2626; /* broadcast red — LIVE badges + on-stage pulse only */
+  --color-live-rgb: 220, 38, 38;
+  --color-live-ink: #ffffff;
+  --color-live-soft: #fdeaea;
+
+  --color-success: #0b7a46;
+  --color-success-soft: #e7f6ee;
+
+  --color-warn: #b45309;
+  --color-warn-soft: #fdf1e3;
+
+  --color-danger: #dc2626;
+  --color-danger-soft: #fdeaea;
+
+  /* Dark-surface variants (stage screen + inverted bands) — separately verified,
+     the light-mode faint/accent values do not meet 4.5:1 when the surface flips. */
+  --color-ink-faint-on-dark: #96a0c0; /* 7.2:1 on --color-ink */
+  --color-live-on-dark: #f87171; /* 6.8:1 on --color-ink */
+  --color-live-on-dark-rgb: 248, 113, 113;
+  --color-primary-on-dark: #8fa2f7; /* 7.7:1 on --color-ink */
+  --color-line-on-dark: rgba(255, 255, 255, 0.14);
+  --color-surface-on-dark: rgba(255, 255, 255, 0.06);
+
+  /* ============ Type ============ */
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  --fs-display-xl: clamp(2.75rem, 3.2vw + 2rem, 6rem);
+  --fs-display-lg: clamp(2rem, 2vw + 1.5rem, 3.75rem);
+  --fs-display-md: clamp(1.5rem, 1vw + 1.2rem, 2.25rem);
+  --fs-display-sm: clamp(1.125rem, 0.5vw + 1rem, 1.5rem);
+  --fs-body-lg: 1.125rem;
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --fs-mono: 0.8125rem;
+
+  --lh-tight: 1.05;
+  --lh-snug: 1.3;
+  --lh-body: 1.6;
+
+  --ls-tight: -0.02em;
+  --ls-mono: 0.06em;
+
+  /* ============ Space (8px rhythm) ============ */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 8rem;
+
+  /* ============ Shape ============
+     Two registers, deliberately: the marketing surface keeps the sharp,
+     editorial identity (--radius); the product surfaces (auth, dashboard,
+     operator, attendee) use a restrained modern scale for better affordance
+     on interactive controls without turning into generic rounded-card SaaS. */
+  --radius: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  --border: 1px solid var(--color-line);
+  --border-strong: 1px solid var(--color-line-strong);
+
+  --shadow-sm: 0 1px 2px rgba(11, 18, 32, 0.06);
+  --shadow-md: 0 4px 16px rgba(11, 18, 32, 0.08);
+  --shadow-lg: 0 16px 40px rgba(11, 18, 32, 0.14);
+
+  /* ============ Layout ============ */
+  --content-max: 1280px;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+
+  /* ============ Motion ============ */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --dur-slow: 320ms;
+}
