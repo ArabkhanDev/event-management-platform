@@ -1,0 +1,58 @@
+# Render Blueprint — backend only.
+#
+# The database lives on Neon (Render's own free Postgres expires after 30 days,
+# Neon's free tier does not) and the frontend on Vercel, so this file describes
+# a single Docker web service. See DEPLOYMENT.md for the full walkthrough.
+
+services:
+  - type: web
+    name: meet2be-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+    envVars:
+      # ---- database (Neon) ----
+      # Use the DIRECT (non-pooled) Neon endpoint and keep sslmode=require, e.g.
+      # jdbc:postgresql://ep-xxx.eu-central-1.aws.neon.tech/meet2be?sslmode=require
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+
+      # ---- auth ----
+      - key: JWT_SECRET
+        generateValue: true
+
+      # ---- public URLs (fill in once the Vercel domain exists) ----
+      - key: CORS_ORIGINS
+        sync: false
+      - key: PUBLIC_APP_BASE_URL
+        sync: false
+      - key: PUBLIC_API_BASE_URL
+        sync: false
+
+      # ---- mail ----
+      # Free Render web services block outbound 25/465/587, so the relay must
+      # accept 2525. Brevo's free plan (300 emails/day) does.
+      - key: MAIL_HOST
+        value: smtp-relay.brevo.com
+      - key: MAIL_PORT
+        value: "2525"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+
+      # ---- resource limits ----
+      # Slide rendering holds the whole PDF plus every rasterised page in heap,
+      # which does not fit in 512MB at the 40MB default.
+      - key: MAX_UPLOAD_SIZE
+        value: 10MB
