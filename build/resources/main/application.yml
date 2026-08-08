@@ -1,0 +1,58 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: meet2be-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/meet2be}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  jackson:
+    default-property-inclusion: non_null
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+  servlet:
+    multipart:
+      max-file-size: ${MAX_UPLOAD_SIZE:40MB}
+      max-request-size: ${MAX_UPLOAD_SIZE:40MB}
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:arabkhanramazanov@gmail.com}
+    password: ${MAIL_PASSWORD:syoplprrkptwequm}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:true}
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+meet2be:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-change-me-please-this-must-be-at-least-32-bytes}
+    expiration-ms: ${JWT_EXPIRATION_MS:604800000}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  mail:
+    from: ${MAIL_FROM:no-reply@meet2be.local}
+  public:
+    api-base-url: ${PUBLIC_API_BASE_URL:http://localhost:8080}
+    app-base-url: ${PUBLIC_APP_BASE_URL:http://localhost:5173}
+
+logging:
+  level:
+    com.meet2be: INFO
