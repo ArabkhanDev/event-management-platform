@@ -5,7 +5,7 @@
 import { LANGUAGE_STORAGE_KEY } from "../i18n";
 
 export const API_BASE: string =
-  (import.meta.env.VITE_API_BASE as string | undefined) || "http://localhost:8089/api";
+  (import.meta.env.VITE_API_BASE as string | undefined) || "http://localhost:8080/api";
 
 export const TOKEN_KEY = "meet2be_token";
 export const USER_KEY = "meet2be_user";

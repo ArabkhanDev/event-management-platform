@@ -1,5 +1,6 @@
 server:
-  port: 8080
+  # PaaS hosts (Render, Fly, Koyeb) inject the port to bind on as PORT.
+  port: ${PORT:8080}
 
 spring:
   application:
@@ -9,6 +10,10 @@ spring:
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      # Serverless Postgres (Neon) caps concurrent connections well below the
+      # Hikari default of 10, and a 512MB container cannot afford more anyway.
+      maximum-pool-size: ${DB_POOL_SIZE:5}
   jpa:
     hibernate:
       ddl-auto: update
@@ -27,10 +32,13 @@ spring:
       max-file-size: ${MAX_UPLOAD_SIZE:40MB}
       max-request-size: ${MAX_UPLOAD_SIZE:40MB}
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:arabkhanramazanov@gmail.com}
-    password: ${MAIL_PASSWORD:syoplprrkptwequm}
+    # Credentials are supplied per-environment — never defaulted in source.
+    # Free PaaS hosts commonly block outbound 25/465/587, so relays that also
+    # listen on 2525 (Brevo, Mailtrap, SendGrid) are configurable via MAIL_PORT.
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:2525}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -52,6 +60,23 @@ meet2be:
   public:
     api-base-url: ${PUBLIC_API_BASE_URL:http://localhost:8080}
     app-base-url: ${PUBLIC_APP_BASE_URL:http://localhost:5173}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  health:
+    # The default indicator opens an SMTP connection on every probe. A relay
+    # being unreachable does not mean the service is unable to serve requests,
+    # and letting it report DOWN makes the platform restart-loop the container.
+    mail:
+      enabled: false
 
 logging:
   level:
