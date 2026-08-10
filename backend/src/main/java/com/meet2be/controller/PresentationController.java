@@ -1,6 +1,6 @@
 package com.meet2be.controller;
 
-import com.meet2be.dao.entity.Presentation;
+import com.meet2be.model.dto.PresentationFileDto;
 import com.meet2be.model.dto.PresentationDto;
 import com.meet2be.model.request.UpdatePresentationRequest;
 import com.meet2be.service.PresentationService;
@@ -8,11 +8,14 @@ import com.meet2be.util.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 
@@ -25,8 +28,8 @@ public class PresentationController {
     @PostMapping("/api/sessions/{sessionId}/presentations")
     public ResponseEntity<PresentationDto> upload(@PathVariable Long sessionId,
                                                   @RequestParam("file") MultipartFile file) {
-        Presentation presentation = presentationService.upload(sessionId, CurrentUser.id(), file);
-        return ResponseEntity.status(HttpStatus.CREATED).body(PresentationDto.from(presentation));
+        PresentationDto presentation = presentationService.upload(sessionId, CurrentUser.id(), file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(presentation);
     }
 
     @GetMapping("/api/sessions/{sessionId}/presentations")
@@ -63,5 +66,25 @@ public class PresentationController {
                 .contentType(MediaType.IMAGE_PNG)
                 .cacheControl(CacheControl.maxAge(Duration.ofDays(7)).cachePublic())
                 .body(image);
+    }
+
+    /**
+     * Never cached: whether a deck may be downloaded is a permission the
+     * organiser can withdraw, and a cached copy would outlive the decision.
+     */
+    @GetMapping("/api/public/presentations/{id}/download")
+    public ResponseEntity<byte[]> download(@PathVariable Long id) {
+        PresentationFileDto file = presentationService.download(id);
+
+        ContentDisposition disposition = ContentDisposition.attachment()
+                .filename(file.getFilename(), StandardCharsets.UTF_8)
+                .build();
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(file.getContentType()))
+                .contentLength(file.getSizeBytes())
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                .cacheControl(CacheControl.noStore())
+                .body(file.getData());
     }
 }

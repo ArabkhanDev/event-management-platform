@@ -88,16 +88,17 @@
     },
     "moduleGrid": {
       "eyebrow": "What's inside",
-      "heading": "Seven modules, one control surface",
+      "heading": "Eight modules, one control surface",
       "lede": "Every module reads from the same event and session model, so nothing needs to be wired together manually on event day.",
       "items": [
         { "title": "Live Q&A", "copy": "Attendees submit questions from their phone; moderators approve, reject, or push them to the big screen." },
         { "title": "Keypad Voting", "copy": "Instant multiple-choice polls with live, animated result bars visible to the whole room." },
-        { "title": "Screen Management", "copy": "One operator board drives the projector — swap between question, poll, and break states in a click." },
+        { "title": "Score Game", "copy": "Quiz questions worth points, answered from the floor, with a leaderboard that updates as answers land." },
         { "title": "Survey", "copy": "Post-session feedback forms with rating, text, single-choice and dropdown questions, aggregated live." },
-        { "title": "Analytics", "copy": "Every question, vote and response rolls up into a per-session results view you can export." },
-        { "title": "Speaker Management", "copy": "Assign a speaker and hall to every session, so the schedule stays accurate as the day changes." },
-        { "title": "Schedule", "copy": "A single source of truth for sessions across halls, tracks and days — attendees always see what's live." }
+        { "title": "Presentations", "copy": "Upload a PDF and drive it from the operator board — every attendee follows the current slide on their own phone." },
+        { "title": "Screen Management", "copy": "One operator board drives the projector — swap between question, poll, game and break states in a click." },
+        { "title": "Analytics", "copy": "Every question, vote and response rolls up into a per-session results view you can export as CSV." },
+        { "title": "Email Campaigns", "copy": "Invite attendees by email and see who opened and clicked, tied to the event they were invited to." }
       ]
     },
     "formatCards": {
@@ -148,17 +149,13 @@
   "plans": {
     "eyebrow": "Pricing",
     "heading": "The right plan for your event.",
-    "lede": "One price for the year, with a set number of events included — no daily rates, no per-attendee fees.",
-    "trustGdpr": "GDPR-ready",
+    "lede": "One price for the year, with a set number of events included — no daily rates, no per-attendee fees. Every plan includes the full product.",
     "trustFast": "Live in under 24 hours",
     "trustNoApp": "No attendee app to install",
+    "trustLanguages": "AZ · EN · RU out of the box",
     "includedEyebrow": "What's included",
-    "includedHeading": "All modules, by plan",
-    "includedLede": "Module access reflects your plan tier. Enterprise customers can request custom module combinations.",
-    "tableCaption": "Module availability by pricing plan",
-    "moduleColumn": "Module",
-    "includedInTier": "Included in {{tier}}",
-    "notIncludedInTier": "Not included in {{tier}}",
+    "includedHeading": "Every module, on every plan",
+    "includedLede": "Nothing is locked behind a higher tier. Plans differ only in how many events and attendees you need — not which parts of the product you can use.",
     "modules": {
       "Live Q&A": "Live Q&A",
       "Screen Management": "Screen Management",
@@ -173,40 +170,45 @@
     "howHeading": "Everything you need, one workflow",
     "steps": [
       { "title": "Create your account", "copy": "Register as an organizer in seconds — no sales call required to get started." },
-      { "title": "Choose your plan", "copy": "Pick the tier that matches your expected attendance and unlock its modules instantly." },
+      { "title": "Choose your plan", "copy": "Pick the tier that matches how many events and attendees you expect — every module is already unlocked." },
       { "title": "Build your event", "copy": "Add sessions per hall and time slot, and get a join code you can print on badges or drop in slides." },
       { "title": "Invite your attendees", "copy": "They join from their phone's browser in seconds — no account, no app to install." },
       { "title": "Run the room live", "copy": "Moderate Q&A, launch polls and control the stage screen from the Operator Board." },
       { "title": "Export your results", "copy": "Download every question, vote and response as CSV the moment your session ends." }
     ],
     "tiersEyebrow": "Choose your plan",
-    "tiersHeading": "The right tier for every event",
+    "tiersHeading": "Priced for how big your event gets",
     "tiersLede": "Pay once for the year and get a set number of events included. No daily billing — add more events any time.",
     "mostPopular": "Most popular",
     "tiers": {
-      "Core": { "tagline": "Up to 150 attendees", "blurb": "The essentials for a single-session webinar or a small workshop." },
-      "Growth": { "tagline": "Up to 600 attendees", "blurb": "Survey tools and audience-building extras for a full-day conference." },
-      "Congress": { "tagline": "Up to 1,500 attendees", "blurb": "Keypad voting and full stage control for multi-track congresses." },
-      "Enterprise": { "tagline": "Unlimited attendees", "blurb": "Every module, for organizations running events at scale." }
+      "Free": { "name": "Free", "tagline": "1 event · up to 50 attendees", "blurb": "Run one real event on us — the best way to see the whole room, live, before you commit to anything." },
+      "Starter": { "name": "Starter", "tagline": "4 events / year · up to 300 attendees", "blurb": "For a single-track conference or a recurring monthly meetup." },
+      "Professional": { "name": "Professional", "tagline": "15 events / year · up to 1,500 attendees", "blurb": "For teams running a full events calendar across multiple halls." },
+      "Enterprise": { "name": "Enterprise", "tagline": "Unlimited events · unlimited attendees", "blurb": "SSO, an SLA, invoicing and custom branding for organizations running events at scale." }
     },
     "perYear": "AZN / year",
+    "free": "₼0",
+    "startFree": "Start for free",
     "tailored": "Tailored to your event's scale",
-    "corePlatformIncluded": "Core platform included",
+    "allModulesIncluded": "Every module included",
     "eventsPerYear_one": "{{count}} event / year",
     "eventsPerYear_other": "{{count}} events / year",
     "unlimitedEvents": "Unlimited events",
-    "includedLabel": "Included",
-    "everythingIn": "Everything in {{tier}} +",
+    "attendeesPerEvent_one": "Up to {{count}} attendee / event",
+    "attendeesPerEvent_other": "Up to {{count}} attendees / event",
+    "unlimitedAttendees": "Unlimited attendees",
+    "extraEventPrice": "Extra events: ₼{{price}} each, no upgrade needed",
     "requestQuote": "Request a quote",
-    "discountNote": "Need more than your plan's yearly quota? Extra events are ₼59 each — no need to upgrade.",
+    "discountNote": "Need more than your plan's yearly quota? Extra events are billed per event — no need to upgrade your whole plan.",
     "faqEyebrow": "FAQ",
     "faqHeading": "Frequently asked questions",
     "faqs": [
-      { "q": "How does the yearly event quota work?", "a": "Each plan includes a fixed number of events for the year — for example, Growth includes 8. There's no daily rate: a three-day congress and a single-day workshop each count as just one event against your quota." },
-      { "q": "What if I need more events than my plan includes?", "a": "Add extra events any time, at a flat ₼59 each — no need to upgrade your whole plan just to cover a busier month." },
-      { "q": "Can I change plans partway through the year?", "a": "Yes. Upgrading unlocks the extra modules and event quota immediately, and we prorate the price difference for the months remaining in your plan year." },
+      { "q": "Why don't plans gate any modules?", "a": "Every plan gets the full product — Live Q&A, keypad voting, score games, surveys, presentations, screen control, analytics and email campaigns. Plans differ only in how many events per year and how many attendees per event you need." },
+      { "q": "How does the yearly event quota work?", "a": "Each plan includes a fixed number of events for the year. There's no daily rate: a three-day congress and a single-day workshop each count as just one event against your quota." },
+      { "q": "What if I need more events than my plan includes?", "a": "Add extra events any time at a flat per-event rate — no need to upgrade your whole plan just to cover a busier month." },
+      { "q": "What happens if an event reaches its attendee limit?", "a": "New attendees are asked to check back or contact the organiser once the limit is reached. Anyone already in stays in — the limit only ever blocks new joins, never removes someone." },
+      { "q": "Can I change plans partway through the year?", "a": "Yes — reach out and we'll move you to a new plan, prorating the difference for the months remaining in your plan year." },
       { "q": "Do attendees need to download anything?", "a": "No. Attendees join with a code from any phone's browser — there's no app install and no account to create." },
-      { "q": "Can I run more than one event on the same account?", "a": "Yes — each event gets its own join code, sessions and Operator Board, all managed from one organizer account." },
       { "q": "What's included after my event ends?", "a": "Every question, poll result and survey response stays available to export as CSV for as long as your account exists." }
     ],
     "ctaEyebrow": "Ready when you are",
@@ -244,8 +246,37 @@
       "fallbackError": "Could not create your account. Please try again."
     }
   },
+  "admin": {
+    "navLink": "Admin",
+    "eyebrow": "Platform administration",
+    "heading": "Admin panel",
+    "tabsAriaLabel": "Admin sections",
+    "tabUsers": "Users",
+    "tabEvents": "Events",
+    "colUser": "User",
+    "colPlan": "Plan",
+    "colRole": "Role",
+    "colEvents": "Events",
+    "colEvent": "Event",
+    "colOwner": "Owner",
+    "colStatus": "Status",
+    "colSessions": "Sessions",
+    "colOpen": "Open",
+    "role": { "USER": "User", "ADMIN": "Admin" },
+    "usersLoadError": "Could not load users.",
+    "eventsLoadError": "Could not load events.",
+    "updateError": "Could not save the change.",
+    "forbiddenHeading": "Admin access required",
+    "forbiddenBody": "This account is not a platform administrator."
+  },
   "dashboard": {
     "nav": { "logOut": "Log out" },
+    "plan": { "FREE": "Free plan", "STARTER": "Starter plan", "PROFESSIONAL": "Professional plan", "ENTERPRISE": "Enterprise plan" },
+    "usage": {
+      "eventsOf": "{{used}} of {{total}} events this year",
+      "eventsUnlimited": "Unlimited events",
+      "upgrade": "Upgrade"
+    },
     "eventsList": {
       "eyebrow": "Dashboard",
       "heading": "Your events",
@@ -271,6 +302,12 @@
       "backToDashboardShort": "← Dashboard",
       "joinCodeEyebrow": "Attendee join code",
       "joinCodeHint": "Attendees enter this at /join",
+      "qrAlt": "QR code that opens the join link for this event",
+      "qrDownload": "Download QR",
+      "qrFullscreenOpen": "Show QR full screen",
+      "qrFullscreenLabel": "Event QR code, full screen",
+      "qrFullscreenClose": "Close",
+      "qrFullscreenHint": "Tap anywhere or press Esc to close",
       "emailCampaigns": "Email campaigns",
       "sessionsHeading": "Sessions",
       "sessionStatusLabel": "Session status",
@@ -406,6 +443,8 @@
       "activate": "Present",
       "stop": "Stop presenting",
       "fullscreen": "Full screen",
+      "allowDownload": "Let attendees download this presentation",
+      "downloadUnavailable": "The original file was not kept. Re-upload the presentation to allow downloads.",
       "exitFullscreen": "Exit full screen",
       "fullscreenLabel": "Presentation in full screen",
       "fullscreenHint": "← and → to move between slides, Esc to exit.",
@@ -476,7 +515,8 @@
       "EVENT_NOT_STARTED": { "heading": "This event hasn't started yet", "body": "Questions, polls and slides will appear here as soon as the organiser goes live." },
       "SESSION_NOT_STARTED": { "heading": "This session hasn't started yet", "body": "This page will open automatically once the speaker takes the stage." },
       "EVENT_ENDED": { "heading": "This event has ended", "body": "New questions and votes are closed. Results stay available to view." },
-      "SESSION_ENDED": { "heading": "This session has ended", "body": "New questions and votes are closed. Results stay available to view." }
+      "SESSION_ENDED": { "heading": "This session has ended", "body": "New questions and votes are closed. Results stay available to view." },
+      "EVENT_FULL": { "heading": "This event is full", "body": "It has reached its attendee limit. Ask the organiser about upgrading, or try again later in case a spot opens up." }
     },
     "join": {
       "eyebrow": "Join an event",
@@ -490,7 +530,8 @@
       "emailHelper": "So the organizer can send you updates. Totally optional.",
       "lookingUp": "Looking up…",
       "continue": "Continue",
-      "pickSession": "Pick your session"
+      "pickSession": "Pick your session",
+      "autoJoining": "Joining…"
     },
     "session": {
       "tabAsk": "Ask",
@@ -500,6 +541,7 @@
       "tabSlides": "Slides",
       "slides": {
         "eyebrow": "Live presentation",
+        "download": "Download presentation",
         "emptyHeading": "No presentation is live right now",
         "emptyBody": "When the speaker starts presenting, the slides will appear here.",
         "position": "Slide {{current}} / {{total}}",

@@ -8,6 +8,7 @@ import com.meet2be.exception.ApiException;
 import com.meet2be.model.enums.EventStatus;
 import com.meet2be.model.request.CreateEventRequest;
 import com.meet2be.model.request.UpdateEventRequest;
+import com.meet2be.service.OwnershipService;
 import com.meet2be.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Slf4j
@@ -31,6 +35,7 @@ public class EventServiceHandler implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final SecureRandom random = new SecureRandom();
+    private final OwnershipService ownershipService;
 
     @Override
     public Event create(Long ownerId, CreateEventRequest request) {
@@ -53,7 +58,27 @@ public class EventServiceHandler implements EventService {
 
         event = eventRepository.save(event);
         log.info("ActionLog.create : Event created successfully, eventId={}, ownerId={}", event.getId(), ownerId);
+        logIfOverQuota(owner);
         return event;
+    }
+
+    /**
+     * The yearly event quota is informational, not a gate: the pricing page
+     * promises extra events at a flat per-event rate rather than a forced
+     * upgrade, and there is no payment integration yet to actually charge it.
+     * Blocking creation here would strand a paying customer with no way
+     * forward, so overage is logged for follow-up and surfaced to the owner
+     * via GET /api/account/usage instead of rejected.
+     */
+    private void logIfOverQuota(User owner) {
+        if (owner.getPlan().hasUnlimitedEvents()) {
+            return;
+        }
+        long usedThisYear = countCreatedThisYear(owner.getId());
+        if (usedThisYear > owner.getPlan().getEventsPerYear()) {
+            log.warn("ActionLog.create : Owner exceeded yearly event quota, ownerId={}, plan={}, quota={}, used={}",
+                    owner.getId(), owner.getPlan(), owner.getPlan().getEventsPerYear(), usedThisYear);
+        }
     }
 
     @Override
@@ -116,9 +141,14 @@ public class EventServiceHandler implements EventService {
 
     @Override
     public void requireOwner(Event event, Long requesterId) {
-        if (!event.getOwner().getId().equals(requesterId)) {
-            throw ApiException.forbidden("error.event.notOwner");
-        }
+        ownershipService.requireOwnerOrAdmin(event, requesterId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countCreatedThisYear(Long ownerId) {
+        Instant yearStart = LocalDate.now().withDayOfYear(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+        return eventRepository.countByOwnerIdAndCreatedAtAfter(ownerId, yearStart);
     }
 
     private String generateUniqueJoinCode() {

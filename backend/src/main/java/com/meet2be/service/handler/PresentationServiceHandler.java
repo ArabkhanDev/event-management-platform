@@ -8,12 +8,15 @@ import com.meet2be.dao.repository.PresentationSlideRepository;
 import com.meet2be.dao.repository.SessionRepository;
 import com.meet2be.exception.ApiException;
 import com.meet2be.model.constants.WsMessageType;
+import com.meet2be.model.dto.PresentationFileDto;
 import com.meet2be.model.dto.PresentationDto;
 import com.meet2be.model.dto.WsMessage;
 import com.meet2be.model.enums.PresentationStatus;
 import com.meet2be.model.request.UpdatePresentationRequest;
+import com.meet2be.service.OwnershipService;
 import com.meet2be.service.EventBroadcaster;
 import com.meet2be.service.PresentationService;
+import com.meet2be.service.PresentationStorageService;
 import com.meet2be.service.SessionAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,7 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,22 +50,29 @@ public class PresentationServiceHandler implements PresentationService {
     private final SessionRepository sessionRepository;
     private final EventBroadcaster eventBroadcaster;
     private final SessionAccessService sessionAccessService;
+    private final PresentationStorageService presentationStorageService;
+    private final OwnershipService ownershipService;
 
     @Override
     @Transactional
-    public Presentation upload(Long sessionId, Long requesterId, MultipartFile file) {
+    public PresentationDto upload(Long sessionId, Long requesterId, MultipartFile file) {
         Session session = requireOwnedSession(sessionId, requesterId);
         validateUpload(file);
 
         Presentation presentation = presentationRepository.save(buildPresentation(session, file));
-        int slideCount = renderAndStoreSlides(presentation, file);
+        byte[] source = readBytes(file);
+        int slideCount = renderAndStoreSlides(presentation, source);
+
+        // Retained regardless of the download flag: exposure is a decision the
+        // organiser can revisit, discarding the file is not.
+        presentationStorageService.store(presentation, resolveContentType(file), source);
 
         presentation.setSlideCount(slideCount);
         presentation = presentationRepository.save(presentation);
 
         log.info("ActionLog.upload : Presentation uploaded successfully, presentationId={}, sessionId={}, slideCount={}",
                 presentation.getId(), sessionId, slideCount);
-        return presentation;
+        return toDto(presentation);
     }
 
     private void validateUpload(MultipartFile file) {
@@ -100,8 +111,8 @@ public class PresentationServiceHandler implements PresentationService {
      * Rasterises every PDF page to PNG up front so serving a slide is a single
      * indexed row read rather than a repeated parse of the source document.
      */
-    private int renderAndStoreSlides(Presentation presentation, MultipartFile file) {
-        try (PDDocument document = Loader.loadPDF(file.getBytes())) {
+    private int renderAndStoreSlides(Presentation presentation, byte[] source) {
+        try (PDDocument document = Loader.loadPDF(source)) {
             int pageCount = document.getNumberOfPages();
             if (pageCount == 0) {
                 throw ApiException.badRequest("error.presentation.emptyPdf");
@@ -142,7 +153,7 @@ public class PresentationServiceHandler implements PresentationService {
     public List<PresentationDto> listForSession(Long sessionId, Long requesterId) {
         requireOwnedSession(sessionId, requesterId);
         return presentationRepository.findBySessionIdOrderByCreatedAtDesc(sessionId).stream()
-                .map(PresentationDto::from)
+                .map(this::toDto)
                 .toList();
     }
 
@@ -158,10 +169,13 @@ public class PresentationServiceHandler implements PresentationService {
         if (request.getCurrentSlide() != null) {
             applyCurrentSlide(presentation, request.getCurrentSlide());
         }
+        if (request.getDownloadEnabled() != null) {
+            applyDownloadEnabled(presentation, request.getDownloadEnabled());
+        }
 
         presentation = presentationRepository.save(presentation);
 
-        PresentationDto dto = PresentationDto.from(presentation);
+        PresentationDto dto = toDto(presentation);
         eventBroadcaster.broadcastPresentation(sessionId,
                 WsMessage.of(WsMessageType.PRESENTATION_UPDATED, dto));
         return dto;
@@ -186,6 +200,32 @@ public class PresentationServiceHandler implements PresentationService {
                 });
     }
 
+    private void applyDownloadEnabled(Presentation presentation, boolean enabled) {
+        if (enabled && !presentationStorageService.exists(presentation.getId())) {
+            throw ApiException.badRequest("error.presentation.sourceNotFound");
+        }
+        log.info("ActionLog.update : Presentation download permission changed, presentationId={}, enabled={}",
+                presentation.getId(), enabled);
+        presentation.setDownloadEnabled(enabled);
+    }
+
+    private PresentationDto toDto(Presentation presentation) {
+        return PresentationDto.from(presentation, presentationStorageService.exists(presentation.getId()));
+    }
+
+    private byte[] readBytes(MultipartFile file) {
+        try {
+            return file.getBytes();
+        } catch (IOException e) {
+            log.error("ActionLog.readBytes : Failed to read uploaded file", e);
+            throw ApiException.badRequest("error.presentation.unreadablePdf");
+        }
+    }
+
+    private String resolveContentType(MultipartFile file) {
+        return file.getContentType() == null ? PDF_CONTENT_TYPE : file.getContentType();
+    }
+
     private void applyCurrentSlide(Presentation presentation, int requestedSlide) {
         if (requestedSlide < 1 || requestedSlide > presentation.getSlideCount()) {
             throw ApiException.badRequest("error.presentation.slideOutOfRange", presentation.getSlideCount());
@@ -198,6 +238,7 @@ public class PresentationServiceHandler implements PresentationService {
     public void delete(Long id, Long requesterId) {
         Presentation presentation = getOwned(id, requesterId);
         slideRepository.deleteByPresentationId(presentation.getId());
+        presentationStorageService.delete(presentation.getId());
         presentationRepository.delete(presentation);
         log.info("ActionLog.delete : Presentation deleted successfully, presentationId={}", id);
     }
@@ -207,7 +248,7 @@ public class PresentationServiceHandler implements PresentationService {
     public PresentationDto getActiveForSession(Long sessionId) {
         sessionAccessService.requireReadable(sessionId);
         return presentationRepository.findFirstBySessionIdAndStatus(sessionId, PresentationStatus.ACTIVE)
-                .map(PresentationDto::from)
+                .map(this::toDto)
                 .orElse(null);
     }
 
@@ -223,6 +264,25 @@ public class PresentationServiceHandler implements PresentationService {
                 .orElseThrow(() -> ApiException.notFound("error.presentation.slideNotFound"));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public PresentationFileDto download(Long presentationId) {
+        Presentation presentation = presentationRepository.findById(presentationId)
+                .orElseThrow(() -> ApiException.notFound("error.presentation.notFound"));
+
+        Session session = sessionAccessService.requireReadable(presentation.getSession().getId());
+
+        // The flag protects the speaker's material from the audience, not from
+        // the organiser hosting it.
+        if (!presentation.isDownloadEnabled() && !sessionAccessService.isCurrentUserOwner(session)) {
+            log.warn("ActionLog.download : Rejected download of a deck that is not shared, presentationId={}",
+                    presentationId);
+            throw ApiException.of(HttpStatus.FORBIDDEN, "DOWNLOAD_DISABLED", "error.presentation.downloadDisabled");
+        }
+
+        return presentationStorageService.load(presentationId);
+    }
+
     private Presentation getOwned(Long id, Long requesterId) {
         Presentation presentation = presentationRepository.findById(id)
                 .orElseThrow(() -> ApiException.notFound("error.presentation.notFound"));
@@ -233,9 +293,7 @@ public class PresentationServiceHandler implements PresentationService {
     private Session requireOwnedSession(Long sessionId, Long requesterId) {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> ApiException.notFound("error.session.notFound"));
-        if (!session.getEvent().getOwner().getId().equals(requesterId)) {
-            throw ApiException.forbidden("error.session.notOwner");
-        }
+        ownershipService.requireOwnerOrAdmin(session.getEvent(), requesterId);
         return session;
     }
 }

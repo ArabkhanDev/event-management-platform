@@ -21,12 +21,53 @@ export interface PresentationDto {
   currentSlide: number;
   status: PresentationStatus;
   createdAt: string;
+  /** Organiser has opened this deck for attendees to download. */
+  downloadEnabled: boolean;
+  /** Original file is on hand — false for decks uploaded before retention existed. */
+  sourceAvailable: boolean;
 }
+
+export type PlanTier = "FREE" | "STARTER" | "PROFESSIONAL" | "ENTERPRISE";
+export type UserRole = "USER" | "ADMIN";
 
 export interface User {
   id: string;
   name: string;
   email: string;
+  plan: PlanTier;
+  role: UserRole;
+}
+
+export interface AdminUserDto {
+  id: string;
+  name: string;
+  email: string;
+  plan: PlanTier;
+  role: UserRole;
+  eventCount: number;
+  createdAt: string;
+}
+
+export interface AdminEventDto {
+  id: string;
+  name: string;
+  joinCode: string;
+  status: EventStatus;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+  ownerId: string;
+  ownerName: string;
+  ownerEmail: string;
+  sessionCount: number;
+}
+
+export interface AccountUsageDto {
+  plan: PlanTier;
+  eventsUsedThisYear: number;
+  /** Null when the plan has no yearly cap (Enterprise). */
+  eventsPerYear: number | null;
+  attendeesPerEvent: number | null;
 }
 
 export interface AuthResponse {

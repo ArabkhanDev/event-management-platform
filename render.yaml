@@ -28,6 +28,11 @@ services:
       # ---- auth ----
       - key: JWT_SECRET
         generateValue: true
+      # Email of the account to promote to ADMIN on startup. Leave unset to
+      # skip; the account must register normally first (this never creates
+      # one). See DEPLOYMENT.md.
+      - key: ADMIN_BOOTSTRAP_EMAIL
+        sync: false
 
       # ---- public URLs (fill in once the Vercel domain exists) ----
       - key: CORS_ORIGINS

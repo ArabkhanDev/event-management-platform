@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
@@ -53,6 +54,22 @@ public class Presentation {
     @Column(nullable = false)
     @Builder.Default
     private PresentationStatus status = PresentationStatus.DRAFT;
+
+    /**
+     * Whether attendees may download the original file. Off by default: slides
+     * belong to the speaker, and uploading a deck to drive a room is not the
+     * same as agreeing to hand it out.
+     *
+     * <p>Nullable at the DB level, not {@code nullable = false}: see the note
+     * on {@code User.plan} for why combining a NOT NULL constraint with
+     * {@code ddl-auto: update} is fragile across boots on a populated table.
+     * {@code boolean} (not {@code Boolean}) means the field itself can never
+     * hold a Java null regardless of what the relaxed DB constraint allows.
+     */
+    @Column(name = "download_enabled")
+    @ColumnDefault("false")
+    @Builder.Default
+    private boolean downloadEnabled = false;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

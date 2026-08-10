@@ -33,16 +33,23 @@ export class ApiError extends Error {
   }
 }
 
-/** Reasons an attendee can be turned away from a session. */
+/** Reasons an attendee can be turned away from a session or event. */
 export type AccessErrorCode =
   | "EVENT_NOT_STARTED"
   | "SESSION_NOT_STARTED"
   | "EVENT_ENDED"
-  | "SESSION_ENDED";
+  | "SESSION_ENDED"
+  | "EVENT_FULL";
 
 export function accessCodeOf(error: unknown): AccessErrorCode | null {
   if (!(error instanceof ApiError) || !error.code) return null;
-  const known: AccessErrorCode[] = ["EVENT_NOT_STARTED", "SESSION_NOT_STARTED", "EVENT_ENDED", "SESSION_ENDED"];
+  const known: AccessErrorCode[] = [
+    "EVENT_NOT_STARTED",
+    "SESSION_NOT_STARTED",
+    "EVENT_ENDED",
+    "SESSION_ENDED",
+    "EVENT_FULL",
+  ];
   return known.includes(error.code as AccessErrorCode) ? (error.code as AccessErrorCode) : null;
 }
 

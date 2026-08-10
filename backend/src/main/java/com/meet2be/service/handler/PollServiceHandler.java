@@ -16,6 +16,7 @@ import com.meet2be.model.enums.PollStatus;
 import com.meet2be.model.enums.StageMode;
 import com.meet2be.model.constants.WsMessageType;
 import com.meet2be.model.request.CreatePollRequest;
+import com.meet2be.service.OwnershipService;
 import com.meet2be.service.EventBroadcaster;
 import com.meet2be.service.PollService;
 import com.meet2be.service.SessionAccessService;
@@ -40,6 +41,7 @@ public class PollServiceHandler implements PollService {
     private final EventBroadcaster eventBroadcaster;
     private final StageStateService stageStateService;
     private final SessionAccessService sessionAccessService;
+    private final OwnershipService ownershipService;
 
     @Override
     public Poll create(Long sessionId, Long requesterId, CreatePollRequest request) {
@@ -189,9 +191,7 @@ public class PollServiceHandler implements PollService {
     private Session requireOwnedSession(Long sessionId, Long requesterId) {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> ApiException.notFound("error.session.notFound"));
-        if (!session.getEvent().getOwner().getId().equals(requesterId)) {
-            throw ApiException.forbidden("error.session.notOwner");
-        }
+        ownershipService.requireOwnerOrAdmin(session.getEvent(), requesterId);
         return session;
     }
 }

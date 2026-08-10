@@ -155,6 +155,28 @@ than configuration.
 
 ---
 
+## 4.5 Become an admin
+
+There is no admin signup flow, and only an existing admin can promote anyone
+— so the first one has to come from outside the app:
+
+1. Register a normal account through the app (`/register`) with the email
+   you want as admin.
+2. On Render → `meet2be-api` → **Environment**, set `ADMIN_BOOTSTRAP_EMAIL`
+   to that email. Saving triggers a redeploy.
+3. On startup the backend promotes that account to `ADMIN` if it exists —
+   check the deploy log for `Promoted bootstrap account to ADMIN`. If you
+   registered after setting the variable, redeploy once more (Manual Deploy
+   → Deploy latest commit); the runner only promotes accounts that already
+   exist at boot.
+4. Log in and open `/admin`.
+
+This never creates an account or sets a password — it only flips the role on
+one that already registered itself. Safe to leave set permanently; every
+subsequent boot is a no-op once the account is already `ADMIN`.
+
+---
+
 ## 5. Verify
 
 ```bash

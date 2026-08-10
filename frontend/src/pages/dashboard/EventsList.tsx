@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import "../../styles/dashboard.css";
 import DashboardNav from "../../components/layout/DashboardNav";
 import { api, ApiError } from "../../lib/api";
-import type { EventDto, EventStatus } from "../../types/api";
+import type { AccountUsageDto, EventDto, EventStatus } from "../../types/api";
 
 export default function EventsList() {
   const { t } = useTranslation();
@@ -13,6 +13,12 @@ export default function EventsList() {
   const { data: events, isLoading, error } = useQuery({
     queryKey: ["events"],
     queryFn: () => api.get<EventDto[]>("/events"),
+  });
+  // No plan purchase flow exists yet — every account is FREE until support
+  // upgrades it manually — so this is informational, not a paywall.
+  const { data: usage } = useQuery({
+    queryKey: ["account-usage"],
+    queryFn: () => api.get<AccountUsageDto>("/account/usage"),
   });
 
   const [name, setName] = useState("");
@@ -36,6 +42,9 @@ export default function EventsList() {
       setEndDate("");
       setFormError(null);
       queryClient.invalidateQueries({ queryKey: ["events"] });
+      // A new event is the exact action the usage chip is meant to reflect —
+      // leaving it stale here would be wrong on the one action that matters most.
+      queryClient.invalidateQueries({ queryKey: ["account-usage"] });
     },
     onError: (err) => {
       setFormError(err instanceof ApiError ? err.message : t("dashboard.eventsList.createError"));
@@ -58,6 +67,19 @@ export default function EventsList() {
             <p className="eyebrow">{t("dashboard.eventsList.eyebrow")}</p>
             <h2>{t("dashboard.eventsList.heading")}</h2>
           </div>
+          {usage && (
+            <div className="usage-chip">
+              <span className="usage-chip-plan">{t(`dashboard.plan.${usage.plan}`)}</span>
+              <span className="usage-chip-detail">
+                {usage.eventsPerYear === null
+                  ? t("dashboard.usage.eventsUnlimited")
+                  : t("dashboard.usage.eventsOf", { used: usage.eventsUsedThisYear, total: usage.eventsPerYear })}
+              </span>
+              <Link to="/plans" className="usage-chip-link">
+                {t("dashboard.usage.upgrade")}
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="two-col">

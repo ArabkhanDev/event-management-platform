@@ -50,8 +50,13 @@ export default function PresentationPanel({
   const inFlightSlideRef = useRef(0);
 
   const update = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: Partial<Pick<PresentationDto, "status" | "currentSlide">> }) =>
-      api.patch<PresentationDto>(`/presentations/${id}`, patch),
+    mutationFn: ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: Partial<Pick<PresentationDto, "status" | "currentSlide" | "downloadEnabled">>;
+    }) => api.patch<PresentationDto>(`/presentations/${id}`, patch),
     onSuccess: (presentation) => onUpsert(presentation),
     onSettled: (_data, _error, variables) => {
       if (variables.patch.currentSlide === undefined) return;
@@ -259,6 +264,21 @@ export default function PresentationPanel({
                   <p className="helper-text">{t("operator.presentationPanel.keyboardHint")}</p>
                   <p className="submitted-note">{t("operator.presentationPanel.liveNote")}</p>
                 </>
+              )}
+
+              {/* Permission, not an action — a checkbox reads as a standing
+                  setting where a button would read as "download it now". */}
+              <label className="deck-download-toggle">
+                <input
+                  type="checkbox"
+                  checked={p.downloadEnabled}
+                  disabled={update.isPending || !p.sourceAvailable}
+                  onChange={(e) => update.mutate({ id: p.id, patch: { downloadEnabled: e.target.checked } })}
+                />
+                <span>{t("operator.presentationPanel.allowDownload")}</span>
+              </label>
+              {!p.sourceAvailable && (
+                <p className="helper-text">{t("operator.presentationPanel.downloadUnavailable")}</p>
               )}
 
               <div className="poll-card-actions">

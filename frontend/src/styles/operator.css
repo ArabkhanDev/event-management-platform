@@ -652,3 +652,26 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.deck-download-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  font-size: var(--fs-small);
+  cursor: pointer;
+}
+
+.deck-download-toggle input {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.deck-download-toggle input:disabled,
+.deck-download-toggle:has(input:disabled) {
+  cursor: not-allowed;
+  color: var(--color-ink-faint);
+}

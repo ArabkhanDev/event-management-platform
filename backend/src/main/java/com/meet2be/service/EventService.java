@@ -28,4 +28,7 @@ public interface EventService {
     Event getJoinableByJoinCode(String joinCode);
 
     void requireOwner(Event event, Long requesterId);
+
+    /** Count of events this owner has created since the start of the current calendar year. */
+    long countCreatedThisYear(Long ownerId);
 }

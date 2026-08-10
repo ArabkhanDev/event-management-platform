@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import "../../styles/dashboard.css";
 import DashboardNav from "../../components/layout/DashboardNav";
+import EventQrCode from "../../components/dashboard/EventQrCode";
 import { api, ApiError } from "../../lib/api";
 import type { EventDto, EventStatus, SessionDto, SessionStatus } from "../../types/api";
 
@@ -181,6 +182,11 @@ export default function EventDetail() {
               {t("dashboard.eventDetail.emailCampaigns")}
             </Link>
           </div>
+          <EventQrCode
+            joinUrl={`${window.location.origin}/join/${event.joinCode}`}
+            joinCode={event.joinCode}
+            eventName={event.name}
+          />
         </div>
 
         <div className="two-col">

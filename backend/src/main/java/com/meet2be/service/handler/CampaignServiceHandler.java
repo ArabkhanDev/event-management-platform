@@ -18,6 +18,7 @@ import com.meet2be.model.request.CaptureAttendeeRequest;
 import com.meet2be.model.request.CreateCampaignRequest;
 import com.meet2be.model.request.UpdateAttendeeTagRequest;
 import com.meet2be.model.request.UpdateCampaignRequest;
+import com.meet2be.service.OwnershipService;
 import com.meet2be.service.CampaignService;
 import com.meet2be.service.EmailSender;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class CampaignServiceHandler implements CampaignService {
     private final CampaignRecipientRepository recipientRepository;
     private final EmailSender emailSender;
     private final CampaignLinksProperties linksProperties;
+    private final OwnershipService ownershipService;
 
     @Override
     public EmailCampaign create(Long eventId, Long requesterId, CreateCampaignRequest request) {
@@ -310,18 +312,14 @@ public class CampaignServiceHandler implements CampaignService {
     private EmailCampaign getOwned(Long id, Long requesterId) {
         EmailCampaign campaign = campaignRepository.findById(id)
                 .orElseThrow(() -> ApiException.notFound("error.campaign.notFound"));
-        if (!campaign.getEvent().getOwner().getId().equals(requesterId)) {
-            throw ApiException.forbidden("error.campaign.notOwner");
-        }
+        ownershipService.requireOwnerOrAdmin(campaign.getEvent(), requesterId);
         return campaign;
     }
 
     private Event requireOwnedEvent(Long eventId, Long requesterId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> ApiException.notFound("error.event.notFound"));
-        if (!event.getOwner().getId().equals(requesterId)) {
-            throw ApiException.forbidden("error.event.notOwner");
-        }
+        ownershipService.requireOwnerOrAdmin(event, requesterId);
         return event;
     }
 }

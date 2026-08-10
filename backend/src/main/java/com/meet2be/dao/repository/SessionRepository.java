@@ -7,4 +7,6 @@ import com.meet2be.dao.entity.Session;
 
 public interface SessionRepository extends JpaRepository<Session, Long> {
     List<Session> findByEventId(Long eventId);
+
+    long countByEventId(Long eventId);
 }

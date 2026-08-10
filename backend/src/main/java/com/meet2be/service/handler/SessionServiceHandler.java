@@ -9,6 +9,7 @@ import com.meet2be.model.enums.SessionStatus;
 import com.meet2be.model.enums.StageMode;
 import com.meet2be.model.request.CreateSessionRequest;
 import com.meet2be.model.request.UpdateSessionRequest;
+import com.meet2be.service.OwnershipService;
 import com.meet2be.service.SessionService;
 import com.meet2be.service.StageStateService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class SessionServiceHandler implements SessionService {
     private final SessionRepository sessionRepository;
     private final EventRepository eventRepository;
     private final StageStateService stageStateService;
+    private final OwnershipService ownershipService;
 
     @Override
     public Session create(Long eventId, Long requesterId, CreateSessionRequest request) {
@@ -132,8 +134,6 @@ public class SessionServiceHandler implements SessionService {
 
     @Override
     public void requireOwner(Event event, Long requesterId) {
-        if (!event.getOwner().getId().equals(requesterId)) {
-            throw ApiException.forbidden("error.event.notOwner");
-        }
+        ownershipService.requireOwnerOrAdmin(event, requesterId);
     }
 }

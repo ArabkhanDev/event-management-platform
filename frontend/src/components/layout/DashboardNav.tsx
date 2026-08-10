@@ -22,6 +22,13 @@ export default function DashboardNav() {
         </Link>
         <div className="dash-nav-user">
           <LanguageSwitcher />
+          {/* Cached from login, so a just-promoted admin sees this after their
+              next sign-in; /admin itself works immediately either way. */}
+          {user?.role === "ADMIN" && (
+            <Link to="/admin" className="dash-nav-admin-link">
+              {t("admin.navLink")}
+            </Link>
+          )}
           <span>{user?.name}</span>
           <button className="btn btn-ghost btn-sm" onClick={handleLogout}>
             {t("dashboard.nav.logOut")}

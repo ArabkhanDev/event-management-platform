@@ -19,6 +19,7 @@ import com.meet2be.model.enums.SurveyStatus;
 import com.meet2be.model.request.CreateSurveyQuestionRequest;
 import com.meet2be.model.request.CreateSurveyRequest;
 import com.meet2be.model.request.SubmitAnswerRequest;
+import com.meet2be.service.OwnershipService;
 import com.meet2be.service.SessionAccessService;
 import com.meet2be.service.SurveyService;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class SurveyServiceHandler implements SurveyService {
     private final SurveyAnswerRepository surveyAnswerRepository;
     private final SessionRepository sessionRepository;
     private final SessionAccessService sessionAccessService;
+    private final OwnershipService ownershipService;
 
     @Override
     public Survey create(Long sessionId, Long requesterId, CreateSurveyRequest request) {
@@ -224,9 +226,7 @@ public class SurveyServiceHandler implements SurveyService {
     private Session requireOwnedSession(Long sessionId, Long requesterId) {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> ApiException.notFound("error.session.notFound"));
-        if (!session.getEvent().getOwner().getId().equals(requesterId)) {
-            throw ApiException.forbidden("error.session.notOwner");
-        }
+        ownershipService.requireOwnerOrAdmin(session.getEvent(), requesterId);
         return session;
     }
 }

@@ -27,4 +27,11 @@ public interface SessionAccessService {
      * Passes once the session has started, and keeps passing after it ends.
      */
     Session requireReadable(Long sessionId);
+
+    /**
+     * True when the caller is authenticated as the owner of the session's event.
+     * Lets a public endpoint relax a restriction that exists to protect the
+     * organiser from their own audience, not from themselves.
+     */
+    boolean isCurrentUserOwner(Session session);
 }

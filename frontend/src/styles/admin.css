@@ -1,0 +1,47 @@
+/* Admin panel — cross-account support tables */
+
+.admin-table-scroll {
+  overflow-x: auto;
+  border: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.admin-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: var(--space-4) var(--space-5);
+  text-align: left;
+  border-bottom: var(--border);
+  vertical-align: middle;
+}
+
+.admin-table thead th {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+  font-weight: 500;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table-sub {
+  display: block;
+  font-size: var(--fs-small);
+  color: var(--color-ink-faint);
+}
+
+/* Narrower than a full-width form input — these sit inside table cells. */
+.admin-select {
+  min-width: 150px;
+  padding: var(--space-2) var(--space-3);
+}

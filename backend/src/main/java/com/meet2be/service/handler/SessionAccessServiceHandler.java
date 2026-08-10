@@ -6,6 +6,7 @@ import com.meet2be.exception.ApiException;
 import com.meet2be.model.dto.AuthenticatedUser;
 import com.meet2be.model.enums.EventStatus;
 import com.meet2be.model.enums.SessionAccessState;
+import com.meet2be.service.OwnershipService;
 import com.meet2be.service.SessionAccessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public class SessionAccessServiceHandler implements SessionAccessService {
      * the same way.
      */
     private final SessionRepository sessionRepository;
+    private final OwnershipService ownershipService;
 
     @Override
     public SessionAccessState resolve(Session session) {
@@ -95,12 +97,21 @@ public class SessionAccessServiceHandler implements SessionAccessService {
         return session;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isCurrentUserOwner(Session session) {
+        return isOwner(session);
+    }
+
     private boolean isOwner(Session session) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof AuthenticatedUser user)) {
             return false;
         }
-        return session.getEvent().getOwner().getId().equals(user.getId());
+        // Platform admins get the same pre-live read access as the owner, so a
+        // support intervention can inspect a session that has not started.
+        return session.getEvent().getOwner().getId().equals(user.getId())
+                || ownershipService.isAdmin(user.getId());
     }
 
     private Session loadSession(Long sessionId) {

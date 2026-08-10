@@ -6,6 +6,7 @@ import Home from "./pages/marketing/Home";
 import Plans from "./pages/marketing/Plans";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import AdminPanel from "./pages/admin/AdminPanel";
 import EventsList from "./pages/dashboard/EventsList";
 import EventDetail from "./pages/dashboard/EventDetail";
 import EventCampaigns from "./pages/dashboard/EventCampaigns";
@@ -45,6 +46,14 @@ export default function App() {
               }
             />
             <Route
+              path="/admin"
+              element={
+                <RequireAuth>
+                  <AdminPanel />
+                </RequireAuth>
+              }
+            />
+            <Route
               path="/dashboard/events/:eventId"
               element={
                 <RequireAuth>
@@ -79,6 +88,7 @@ export default function App() {
 
             <Route path="/stage/:sessionId" element={<StageScreen />} />
             <Route path="/join" element={<JoinEvent />} />
+            <Route path="/join/:code" element={<JoinEvent />} />
             <Route path="/event/:sessionId" element={<AttendeeSession />} />
 
             <Route path="*" element={<NotFound />} />

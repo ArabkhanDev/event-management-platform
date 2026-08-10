@@ -42,61 +42,38 @@
   color: var(--color-success);
 }
 
-/* ---------- Comparison table ---------- */
+/* ---------- Included-everywhere module checklist ----------
+   Every tier ships every module now, so this renders once above the tier
+   cards rather than as a per-tier comparison table. */
 
-.compare-scroll {
-  overflow-x: auto;
+.included-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3) var(--space-6);
+  list-style: none;
+  padding: var(--space-6);
+  margin: 0;
   border: var(--border-strong);
   border-radius: var(--radius-lg);
-}
-
-.compare-table {
-  width: 100%;
-  min-width: 640px;
-  border-collapse: collapse;
   background: var(--color-surface);
 }
 
-.compare-table caption {
-  text-align: left;
-  padding: var(--space-5) var(--space-5) 0;
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  color: var(--color-ink-faint);
+@media (min-width: 720px) {
+  .included-modules-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-.compare-table th,
-.compare-table td {
-  padding: var(--space-4) var(--space-5);
-  text-align: center;
-  border-bottom: var(--border);
-}
-
-.compare-table thead th {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-body-lg);
-  border-bottom: var(--border-strong);
-}
-
-.compare-table th[scope="row"] {
-  text-align: left;
+.included-modules-grid li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   font-weight: 500;
-  color: var(--color-ink-soft);
 }
 
-.compare-table tbody tr:last-child th,
-.compare-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.compare-table .check {
+.included-modules-grid .icon {
   color: var(--color-success);
-  margin: 0 auto;
-}
-
-.compare-table .dash {
-  color: var(--color-line);
+  flex-shrink: 0;
 }
 
 /* ---------- Pricing cards ---------- */
@@ -185,38 +162,7 @@
   color: var(--color-ink-faint);
 }
 
-.plan-modules {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  letter-spacing: var(--ls-mono);
-  text-transform: uppercase;
-  color: var(--color-primary);
-  margin-bottom: var(--space-3);
-}
-
-.plan-feature-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
-  flex: 1;
-}
-
-.plan-feature-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  font-size: var(--fs-small);
-  color: var(--color-ink-soft);
-}
-
-.plan-feature-list .icon {
-  color: var(--color-success);
-  margin-top: 3px;
-  flex-shrink: 0;
-}
-
-/* ---------- Included / credits / module rows ---------- */
+/* ---------- Included / credits rows ---------- */
 
 .plan-included-row,
 .plan-credit-row {
@@ -252,66 +198,8 @@
   border: none;
   border-top: var(--border);
   margin: var(--space-4) 0;
-}
-
-.plan-modules-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-3);
-}
-
-.plan-modules-head .label {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  letter-spacing: var(--ls-mono);
-  text-transform: uppercase;
-  color: var(--color-ink-faint);
-}
-
-.plan-modules-count {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  font-weight: 600;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-}
-
-.plan-inherit-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  border-radius: var(--radius-sm);
-  font-size: var(--fs-small);
-  font-weight: 600;
-  margin-bottom: var(--space-3);
-}
-
-.plan-module-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
   flex: 1;
-}
-
-.plan-module-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  font-size: var(--fs-small);
-  color: var(--color-ink-soft);
-}
-
-.plan-module-list .icon {
-  color: var(--color-success);
-  margin-top: 3px;
-  flex-shrink: 0;
+  align-self: flex-end;
 }
 
 .plan-discount-note {

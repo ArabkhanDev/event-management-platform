@@ -19,4 +19,7 @@ public class UpdatePresentationRequest {
      * status.
      */
     private Integer currentSlide;
+
+    /** Null when the request does not touch download permission. */
+    private Boolean downloadEnabled;
 }

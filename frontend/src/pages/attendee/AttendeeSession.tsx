@@ -573,6 +573,18 @@ function SlidesTab({ presentation }: { presentation: PresentationDto | null }) {
         {t("attendee.session.slides.position", { current: currentSlide, total: slideCount })}
       </p>
 
+      {/* Only offered when the organiser has shared the deck. A plain link, so
+          the browser handles the transfer and the Content-Disposition filename. */}
+      {presentation.downloadEnabled && (
+        <a
+          className="btn btn-ghost btn-block"
+          href={`${API_BASE}/public/presentations/${id}/download`}
+          download
+        >
+          {t("attendee.session.slides.download")}
+        </a>
+      )}
+
       <div className="visually-hidden" aria-hidden="true">
         {prefetch.map((n) => (
           <img key={n} src={`${API_BASE}/public/presentations/${id}/slides/${n}`} alt="" />

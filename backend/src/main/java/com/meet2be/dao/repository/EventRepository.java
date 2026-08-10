@@ -2,6 +2,7 @@ package com.meet2be.dao.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import com.meet2be.dao.entity.Event;
@@ -12,4 +13,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findByJoinCode(String joinCode);
 
     boolean existsByJoinCode(String joinCode);
+
+    long countByOwnerIdAndCreatedAtAfter(Long ownerId, Instant createdAfter);
+
+    long countByOwnerId(Long ownerId);
+
+    List<Event> findAllByOrderByCreatedAtDesc();
 }

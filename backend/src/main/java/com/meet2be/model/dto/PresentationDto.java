@@ -24,7 +24,23 @@ public class PresentationDto {
     private PresentationStatus status;
     private Instant createdAt;
 
-    public static PresentationDto from(Presentation presentation) {
+    /** Whether the organiser has opened this deck up for attendees to download. */
+    private boolean downloadEnabled;
+
+    /**
+     * Whether the original file is actually on hand. False for decks uploaded
+     * before source retention existed — they can be shared only by re-uploading,
+     * and the operator UI uses this to explain why the toggle is unavailable.
+     */
+    private boolean sourceAvailable;
+
+    public static PresentationDto from(Presentation presentation, boolean sourceAvailable) {
+        return baseBuilder(presentation)
+                .sourceAvailable(sourceAvailable)
+                .build();
+    }
+
+    private static PresentationDtoBuilder baseBuilder(Presentation presentation) {
         return PresentationDto.builder()
                 .id(presentation.getId())
                 .sessionId(presentation.getSession().getId())
@@ -34,6 +50,6 @@ public class PresentationDto {
                 .currentSlide(presentation.getCurrentSlide())
                 .status(presentation.getStatus())
                 .createdAt(presentation.getCreatedAt())
-                .build();
+                .downloadEnabled(presentation.isDownloadEnabled());
     }
 }
