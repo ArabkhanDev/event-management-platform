@@ -7,7 +7,14 @@ interface AuthContextValue {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
+  /** Creates the account and sends a verification email — does not log in. */
   register: (name: string, email: string, password: string) => Promise<void>;
+  /** Confirms the account and logs it in, same as a fresh login. */
+  verifyEmail: (token: string) => Promise<void>;
+  resendVerification: (email: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  /** Sets the new password and logs the account in. */
+  resetPassword: (token: string, newPassword: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -47,9 +54,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persist]
   );
 
-  const register = useCallback(
-    async (name: string, email: string, password: string) => {
-      const res = await api.post<AuthResponse>("/auth/register", { name, email, password }, { auth: false });
+  const register = useCallback(async (name: string, email: string, password: string) => {
+    await api.post<void>("/auth/register", { name, email, password }, { auth: false });
+  }, []);
+
+  const verifyEmail = useCallback(
+    async (token: string) => {
+      const res = await api.post<AuthResponse>("/auth/verify-email", { token }, { auth: false });
+      persist(res);
+    },
+    [persist]
+  );
+
+  const resendVerification = useCallback(async (email: string) => {
+    await api.post<void>("/auth/resend-verification", { email }, { auth: false });
+  }, []);
+
+  const forgotPassword = useCallback(async (email: string) => {
+    await api.post<void>("/auth/forgot-password", { email }, { auth: false });
+  }, []);
+
+  const resetPassword = useCallback(
+    async (token: string, newPassword: string) => {
+      const res = await api.post<AuthResponse>("/auth/reset-password", { token, newPassword }, { auth: false });
       persist(res);
     },
     [persist]
@@ -63,8 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, token, login, register, logout }),
-    [user, token, login, register, logout]
+    () => ({ user, token, login, register, verifyEmail, resendVerification, forgotPassword, resetPassword, logout }),
+    [user, token, login, register, verifyEmail, resendVerification, forgotPassword, resetPassword, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

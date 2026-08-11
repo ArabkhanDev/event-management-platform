@@ -6,6 +6,9 @@ import Home from "./pages/marketing/Home";
 import Plans from "./pages/marketing/Plans";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyEmail from "./pages/auth/VerifyEmail";
 import AdminPanel from "./pages/admin/AdminPanel";
 import EventsList from "./pages/dashboard/EventsList";
 import EventDetail from "./pages/dashboard/EventDetail";
@@ -36,6 +39,9 @@ export default function App() {
             <Route path="/plans" element={<Plans />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
 
             <Route
               path="/dashboard"

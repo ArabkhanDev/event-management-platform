@@ -466,10 +466,11 @@
 .usage-chip {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-4);
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5);
   border: var(--border);
   border-radius: var(--radius-full);
+  background: var(--color-surface);
   font-size: var(--fs-small);
   flex-wrap: wrap;
 }
@@ -481,20 +482,36 @@
   letter-spacing: var(--ls-mono);
   text-transform: uppercase;
   color: var(--color-primary);
+  white-space: nowrap;
 }
 
 .usage-chip-detail {
+  position: relative;
+  padding-left: var(--space-4);
   color: var(--color-ink-faint);
+  white-space: nowrap;
 }
 
-.usage-chip-link {
-  color: var(--color-primary);
+/* Divider between the plan tag and the usage figure, standing in for a
+   third flex item so gap doesn't add its own spacing around it. */
+.usage-chip-detail::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 1.1em;
+  background: var(--color-line);
+}
+
+.usage-chip-detail-warn {
+  color: var(--color-warn);
   font-weight: 600;
-  text-decoration: none;
 }
 
-.usage-chip-link:hover {
-  text-decoration: underline;
+.usage-chip-upgrade {
+  margin-left: auto;
 }
 
 .dash-nav-admin-link {

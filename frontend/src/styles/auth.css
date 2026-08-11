@@ -86,3 +86,19 @@
 .auth-switch a:hover {
   text-decoration: underline;
 }
+
+.auth-inline-link {
+  font-size: var(--fs-small);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.auth-inline-link:hover {
+  text-decoration: underline;
+}
+
+.auth-forgot-link {
+  display: block;
+  text-align: right;
+  margin-top: var(--space-2);
+}

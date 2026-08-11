@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,7 @@ const STATUS_KEYS: QuestionStatus[] = ["PENDING", "APPROVED", "ON_SCREEN", "REJE
 export default function SessionAnalytics() {
   const { t } = useTranslation();
   const { sessionId } = useParams<{ sessionId: string }>();
+  const [exporting, setExporting] = useState(false);
 
   const { data: session } = useQuery({
     queryKey: ["session", sessionId],
@@ -105,18 +106,23 @@ export default function SessionAnalytics() {
             <button
               type="button"
               className="btn btn-primary btn-sm"
-              disabled={loading || surveyResultsLoading}
-              onClick={() =>
-                exportFullSessionReport(
-                  session?.title || sessionId || "session",
-                  questions ?? [],
-                  polls ?? [],
-                  surveyResultsList
-                )
-              }
+              disabled={loading || surveyResultsLoading || exporting}
+              onClick={async () => {
+                setExporting(true);
+                try {
+                  await exportFullSessionReport(
+                    session?.title || sessionId || "session",
+                    questions ?? [],
+                    polls ?? [],
+                    surveyResultsList
+                  );
+                } finally {
+                  setExporting(false);
+                }
+              }}
             >
               <DownloadIcon />
-              {t("analytics.exportFullReport")}
+              {exporting ? t("analytics.exporting") : t("analytics.exportFullReport")}
             </button>
           </div>
         </div>

@@ -465,6 +465,46 @@
   margin-top: var(--space-4);
 }
 
+/* Pushed to the far end so Delete is never the button a thumb lands on while
+   reaching for Activate or Reopen. Icon-only and quiet until hovered: each
+   card has exactly one action worth reading as a label, and it is not this
+   one. The intent is spelled out in the confirm step that follows. */
+.poll-card-actions .op-delete-btn {
+  margin-left: auto;
+  color: var(--color-ink-faint);
+}
+
+.poll-card-actions .op-delete-btn .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.poll-card-actions .op-delete-btn:hover {
+  background: var(--color-danger-soft);
+  border-color: transparent;
+  color: var(--color-danger);
+}
+
+.poll-card-actions .op-delete-btn:focus-visible {
+  outline: 2px solid var(--color-danger);
+  outline-offset: 2px;
+}
+
+.op-confirm-row {
+  flex-wrap: wrap;
+  align-items: center;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+}
+
+.op-confirm-text {
+  flex: 1;
+  min-width: 12rem;
+  color: var(--color-danger);
+  font-size: var(--fs-small);
+}
+
 .survey-result-block {
   border: var(--border);
   border-radius: var(--radius-md);

@@ -10,19 +10,24 @@ import com.meet2be.model.dto.AdminEventDto;
 import com.meet2be.model.dto.AdminUserDto;
 import com.meet2be.model.enums.UserRole;
 import com.meet2be.model.request.UpdateUserRequest;
+import com.meet2be.model.response.PageResponse;
 import com.meet2be.service.AdminService;
 import com.meet2be.service.OwnershipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminServiceHandler implements AdminService {
+
+    /** Ceiling on ?size= so one request cannot ask for the entire table. */
+    private static final int MAX_PAGE_SIZE = 100;
 
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
@@ -31,12 +36,14 @@ public class AdminServiceHandler implements AdminService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<AdminUserDto> listUsers(Long requesterId) {
+    public PageResponse<AdminUserDto> listUsers(Long requesterId, int page, int size) {
         ownershipService.requireAdmin(requesterId);
 
-        return userRepository.findAllByOrderByCreatedAtDesc().stream()
+        Page<User> users = userRepository.findAllByOrderByCreatedAtDesc(toPageable(page, size));
+
+        return PageResponse.of(users, users.getContent().stream()
                 .map(this::toUserDto)
-                .toList();
+                .toList());
     }
 
     @Override
@@ -55,8 +62,25 @@ public class AdminServiceHandler implements AdminService {
         if (request.getRole() != null) {
             applyRoleChange(target, requesterId, request.getRole());
         }
+        if (request.getBlocked() != null) {
+            applyBlockedChange(target, requesterId, request.getBlocked());
+        }
 
         return toUserDto(userRepository.save(target));
+    }
+
+    /**
+     * Same reasoning as {@link #applyRoleChange}: an admin blocking themselves
+     * would lock them out of the panel with no one left to reverse it.
+     */
+    private void applyBlockedChange(User target, Long requesterId, boolean blocked) {
+        if (target.getId().equals(requesterId) && blocked) {
+            throw ApiException.badRequest("error.admin.cannotBlockSelf");
+        }
+
+        log.info("ActionLog.updateUser : Admin changed block status, adminId={}, targetUserId={}, blocked={}",
+                requesterId, target.getId(), blocked);
+        target.setBlocked(blocked);
     }
 
     /**
@@ -76,12 +100,26 @@ public class AdminServiceHandler implements AdminService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<AdminEventDto> listEvents(Long requesterId) {
+    public PageResponse<AdminEventDto> listEvents(Long requesterId, int page, int size) {
         ownershipService.requireAdmin(requesterId);
 
-        return eventRepository.findAllByOrderByCreatedAtDesc().stream()
+        Page<Event> events = eventRepository.findAllByOrderByCreatedAtDesc(toPageable(page, size));
+
+        return PageResponse.of(events, events.getContent().stream()
                 .map(this::toEventDto)
-                .toList();
+                .toList());
+    }
+
+    /**
+     * Clamped rather than rejected: page controls are a navigation aid, and a
+     * stale link or hand-edited query string should land on a sane page instead
+     * of an error. The size ceiling is what stops {@code ?size=1000000} turning
+     * a listing into a full table scan.
+     */
+    private Pageable toPageable(int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        return PageRequest.of(safePage, safeSize);
     }
 
     private AdminUserDto toUserDto(User user) {
@@ -91,6 +129,7 @@ public class AdminServiceHandler implements AdminService {
                 .email(user.getEmail())
                 .plan(user.getPlan())
                 .role(user.getRole())
+                .blocked(user.isBlocked())
                 .eventCount(eventRepository.countByOwnerId(user.getId()))
                 .createdAt(user.getCreatedAt())
                 .build();

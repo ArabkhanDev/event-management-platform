@@ -21,4 +21,7 @@ public class UpdateUserRequest {
     private PlanTier plan;
 
     private UserRole role;
+
+    /** Null leaves the current block state untouched, same as the fields above. */
+    private Boolean blocked;
 }

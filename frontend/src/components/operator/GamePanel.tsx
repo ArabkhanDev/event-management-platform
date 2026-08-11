@@ -21,17 +21,23 @@ export default function GamePanel({
   questions,
   leaderboard,
   onUpsertQuestion,
+  onRemoveQuestion,
 }: {
   sessionId: string;
   questions: GameQuestionDto[];
   leaderboard: SessionLeaderboardDto | null;
   onUpsertQuestion: (question: GameQuestionDto) => void;
+  onRemoveQuestion: (id: string) => void;
 }) {
   const { t } = useTranslation();
   const [prompt, setPrompt] = useState("");
   const [points, setPoints] = useState(100);
   const [options, setOptions] = useState<DraftOption[]>(emptyOptions());
   const [formError, setFormError] = useState<string | null>(null);
+  // Which card is asking "are you sure?" — deleting takes the answers and the
+  // points with it, so it never happens on a single click.
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const createQuestion = useMutation({
     mutationFn: () =>
@@ -56,6 +62,18 @@ export default function GamePanel({
     mutationFn: ({ id, status }: { id: string; status: "ACTIVE" | "CLOSED" }) =>
       api.patch<GameQuestionDto>(`/games/${id}`, { status }),
     onSuccess: (question) => onUpsertQuestion(question),
+  });
+
+  const deleteQuestion = useMutation({
+    mutationFn: (id: string) => api.delete<void>(`/games/${id}`),
+    onSuccess: (_res, id) => {
+      onRemoveQuestion(id);
+      setConfirmingDeleteId(null);
+      setDeleteError(null);
+    },
+    onError: (err) => {
+      setDeleteError(err instanceof ApiError ? err.message : t("operator.gamePanel.deleteError"));
+    },
   });
 
   function onSubmit(e: FormEvent) {
@@ -229,26 +247,90 @@ export default function GamePanel({
                   </div>
                 );
               })}
-              <div className="poll-card-actions">
-                {question.status === "DRAFT" && (
-                  <button
-                    className="btn btn-sm btn-primary"
-                    disabled={setStatus.isPending}
-                    onClick={() => setStatus.mutate({ id: question.id, status: "ACTIVE" })}
-                  >
-                    {t("common.activate")}
-                  </button>
-                )}
-                {question.status === "ACTIVE" && (
+              {confirmingDeleteId === question.id ? (
+                <div className="poll-card-actions op-confirm-row">
+                  <span className="op-confirm-text">
+                    {total > 0
+                      ? t("operator.gamePanel.deleteConfirmWithAnswers", { count: total })
+                      : t("operator.gamePanel.deleteConfirm")}
+                  </span>
                   <button
                     className="btn btn-sm btn-danger"
-                    disabled={setStatus.isPending}
-                    onClick={() => setStatus.mutate({ id: question.id, status: "CLOSED" })}
+                    disabled={deleteQuestion.isPending}
+                    onClick={() => deleteQuestion.mutate(question.id)}
                   >
-                    {t("operator.gamePanel.closeAndReveal")}
+                    {deleteQuestion.isPending
+                      ? t("operator.gamePanel.deleting")
+                      : t("operator.gamePanel.yesDelete")}
                   </button>
-                )}
-              </div>
+                  <button
+                    className="btn btn-sm btn-ghost"
+                    disabled={deleteQuestion.isPending}
+                    onClick={() => {
+                      setConfirmingDeleteId(null);
+                      setDeleteError(null);
+                    }}
+                  >
+                    {t("common.cancel")}
+                  </button>
+                </div>
+              ) : (
+                <div className="poll-card-actions">
+                  {question.status === "DRAFT" && (
+                    <button
+                      className="btn btn-sm btn-primary"
+                      disabled={setStatus.isPending}
+                      onClick={() => setStatus.mutate({ id: question.id, status: "ACTIVE" })}
+                    >
+                      {t("common.activate")}
+                    </button>
+                  )}
+                  {question.status === "ACTIVE" && (
+                    <button
+                      className="btn btn-sm btn-danger"
+                      disabled={setStatus.isPending}
+                      onClick={() => setStatus.mutate({ id: question.id, status: "CLOSED" })}
+                    >
+                      {t("operator.gamePanel.closeAndReveal")}
+                    </button>
+                  )}
+                  {/* Reopening keeps the answers already in — the lock is per
+                      question and voter, so it only lets people who missed it
+                      answer, it does not let anyone answer twice. */}
+                  {question.status === "CLOSED" && (
+                    <button
+                      className="btn btn-sm btn-primary"
+                      disabled={setStatus.isPending}
+                      onClick={() => setStatus.mutate({ id: question.id, status: "ACTIVE" })}
+                    >
+                      {t("operator.gamePanel.reopen")}
+                    </button>
+                  )}
+                  {/* Icon-only, matching the option remover above: a bold grey
+                      "Delete" label sat at the same weight as the primary
+                      action and read as a disabled button. */}
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-ghost btn-icon op-delete-btn"
+                    title={t("operator.gamePanel.deleteQuestion")}
+                    aria-label={t("operator.gamePanel.deleteQuestion")}
+                    onClick={() => {
+                      setConfirmingDeleteId(question.id);
+                      setDeleteError(null);
+                    }}
+                  >
+                    <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              {deleteError && confirmingDeleteId === question.id && (
+                <p className="form-error" role="alert">
+                  {deleteError}
+                </p>
+              )}
             </div>
           );
         })}

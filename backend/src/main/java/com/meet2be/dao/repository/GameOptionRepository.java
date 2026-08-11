@@ -7,4 +7,6 @@ import com.meet2be.dao.entity.GameOption;
 
 public interface GameOptionRepository extends JpaRepository<GameOption, Long> {
     List<GameOption> findByQuestionIdOrderByOrderIndexAsc(Long questionId);
+
+    void deleteByQuestionId(Long questionId);
 }

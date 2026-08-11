@@ -2,6 +2,7 @@ package com.meet2be.controller;
 
 import com.meet2be.model.dto.PresentationFileDto;
 import com.meet2be.model.dto.PresentationDto;
+import com.meet2be.model.dto.SlideImageDto;
 import com.meet2be.model.request.UpdatePresentationRequest;
 import com.meet2be.service.PresentationService;
 import com.meet2be.util.CurrentUser;
@@ -61,11 +62,11 @@ public class PresentationController {
      */
     @GetMapping("/api/public/presentations/{id}/slides/{slideNumber}")
     public ResponseEntity<byte[]> getSlideImage(@PathVariable Long id, @PathVariable int slideNumber) {
-        byte[] image = presentationService.getSlideImage(id, slideNumber);
+        SlideImageDto slide = presentationService.getSlideImage(id, slideNumber);
         return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_PNG)
+                .contentType(MediaType.parseMediaType(slide.getContentType()))
                 .cacheControl(CacheControl.maxAge(Duration.ofDays(7)).cachePublic())
-                .body(image);
+                .body(slide.getData());
     }
 
     /**

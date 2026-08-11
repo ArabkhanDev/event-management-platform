@@ -2,6 +2,7 @@ package com.meet2be.service;
 
 import com.meet2be.model.dto.PresentationDto;
 import com.meet2be.model.dto.PresentationFileDto;
+import com.meet2be.model.dto.SlideImageDto;
 import com.meet2be.model.request.UpdatePresentationRequest;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,7 +20,7 @@ public interface PresentationService {
 
     PresentationDto getActiveForSession(Long sessionId);
 
-    byte[] getSlideImage(Long presentationId, int slideNumber);
+    SlideImageDto getSlideImage(Long presentationId, int slideNumber);
 
     /**
      * The original PDF, for attendees. Requires the session to be readable and

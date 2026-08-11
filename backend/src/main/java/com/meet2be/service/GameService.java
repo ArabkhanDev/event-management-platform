@@ -16,6 +16,12 @@ public interface GameService {
 
     GameQuestionDto answer(Long questionId, String voterToken, Long optionId, String playerName);
 
+    /**
+     * Removes a question with its options and every answer given to it. Points
+     * earned on that question leave the leaderboard with it.
+     */
+    void delete(Long id, Long requesterId);
+
     GameQuestionDto getResults(Long questionId);
 
     List<GameQuestionDto> listForSession(Long sessionId, Long requesterId);

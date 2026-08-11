@@ -22,6 +22,7 @@ public class AdminUserDto {
     private String email;
     private PlanTier plan;
     private UserRole role;
+    private boolean blocked;
     private long eventCount;
     private Instant createdAt;
 }

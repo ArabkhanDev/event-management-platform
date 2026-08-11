@@ -142,6 +142,12 @@ export default function EventDetail() {
     );
   }
 
+  // datetime-local's min/max take a bare local timestamp, no timezone — this
+  // only steers the picker UI, the real check is server-side in
+  // SessionServiceHandler, which is timezone-aware.
+  const sessionTimeMin = `${event.startDate}T00:00`;
+  const sessionTimeMax = `${event.endDate}T23:59`;
+
   return (
     <>
       <DashboardNav />
@@ -276,6 +282,8 @@ export default function EventDetail() {
                     type="datetime-local"
                     className="input"
                     required
+                    min={sessionTimeMin}
+                    max={sessionTimeMax}
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
                   />
@@ -287,11 +295,16 @@ export default function EventDetail() {
                     type="datetime-local"
                     className="input"
                     required
+                    min={sessionTimeMin}
+                    max={sessionTimeMax}
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
                   />
                 </div>
               </div>
+              <p className="helper-text">
+                {t("dashboard.eventDetail.sessionTimeHint", { start: event.startDate, end: event.endDate })}
+              </p>
               <button type="submit" className="btn btn-primary btn-block" disabled={createSession.isPending}>
                 {createSession.isPending ? t("dashboard.eventDetail.adding") : t("dashboard.eventDetail.addSession")}
               </button>

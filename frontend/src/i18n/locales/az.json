@@ -25,6 +25,12 @@
     "exportCsv": "CSV ixrac et",
     "export": "İxrac et",
     "leaderboard": "Liderlər lövhəsi",
+    "pagination": {
+      "ariaLabel": "Səhifələmə",
+      "previous": "Əvvəlki",
+      "next": "Növbəti",
+      "goToPage": "{{page}}-ci səhifəyə keç"
+    },
     "points": "xal",
     "count": {
       "recipients_one": "{{count}} alıcı",
@@ -224,11 +230,17 @@
       "heading": "Daxil ol",
       "email": "E-poçt",
       "password": "Şifrə",
+      "forgotPasswordLink": "Şifrəni unutmusunuz?",
       "submitting": "Daxil olunur…",
       "submit": "Daxil ol",
       "switchPrompt": "meet2be-də yenisiniz?",
       "switchLink": "Hesab yarat",
-      "fallbackError": "Daxil olmaq mümkün olmadı. Yenidən cəhd edin."
+      "fallbackError": "Daxil olmaq mümkün olmadı. Yenidən cəhd edin.",
+      "emailNotVerified": {
+        "body": "Daxil olmadan əvvəl {{email}} təsdiqləyin — qeydiyyat zamanı göndərdiyimiz link üçün poçtunuzu yoxlayın.",
+        "resend": "Təsdiq e-poçtunu yenidən göndər",
+        "resent": "Göndərildi! Poçtunuzu yoxlayın."
+      }
     },
     "register": {
       "quote": "“Dəqiqələr içində qur. Avadanlıq yoxdur, iştirakçılar üçün tətbiq yükləməsi yoxdur.”",
@@ -243,7 +255,60 @@
       "submit": "Hesab yarat",
       "switchPrompt": "Artıq hesabınız var?",
       "switchLink": "Daxil ol",
-      "fallbackError": "Hesabınızı yaratmaq mümkün olmadı. Yenidən cəhd edin."
+      "fallbackError": "Hesabınızı yaratmaq mümkün olmadı. Yenidən cəhd edin.",
+      "checkEmail": {
+        "eyebrow": "Az qaldı",
+        "heading": "Poçtunuzu yoxlayın",
+        "body": "{{email}} ünvanına təsdiq linki göndərdik. Hesabınızı aktivləşdirmək üçün linkə klikləyin.",
+        "resend": "Almadınız? Yenidən göndər",
+        "resent": "Göndərildi! Poçtunuzu yoxlayın.",
+        "backToLogin": "Girişə qayıt"
+      }
+    },
+    "forgotPassword": {
+      "eyebrow": "Şifrəni sıfırla",
+      "heading": "Şifrəni unutmusunuz?",
+      "body": "E-poçtunuzu daxil edin, şifrəni sıfırlamaq üçün link göndərəcəyik.",
+      "email": "E-poçt",
+      "submit": "Sıfırlama linki göndər",
+      "submitting": "Göndərilir…",
+      "backToLogin": "Girişə qayıt",
+      "sent": {
+        "heading": "Poçtunuzu yoxlayın",
+        "body": "{{email}} ünvanı ilə hesab varsa, şifrəni sıfırlamaq üçün link göndərdik."
+      }
+    },
+    "resetPassword": {
+      "eyebrow": "Şifrəni sıfırla",
+      "heading": "Yeni şifrə seçin",
+      "newPassword": "Yeni şifrə",
+      "confirmPassword": "Yeni şifrəni təsdiqlə",
+      "passwordHint": "Ən azı 8 simvol.",
+      "submit": "Şifrəni sıfırla",
+      "submitting": "Sıfırlanır…",
+      "mismatchError": "Şifrələr uyğun gəlmir.",
+      "fallbackError": "Şifrəni sıfırlamaq mümkün olmadı. Linkin müddəti bitmiş ola bilər.",
+      "invalidLink": {
+        "heading": "Bu link etibarsızdır və ya müddəti bitib",
+        "body": "Yeni şifrə sıfırlama linki tələb edin və yenidən cəhd edin.",
+        "cta": "Yeni link tələb et"
+      }
+    },
+    "verifyEmail": {
+      "verifying": "E-poçtunuz təsdiqlənir…",
+      "success": {
+        "eyebrow": "Hazırdır",
+        "heading": "E-poçt təsdiqləndi",
+        "body": "İdarə panelinizə yönləndirilirsiniz…"
+      },
+      "error": {
+        "eyebrow": "Təsdiqləmə uğursuz oldu",
+        "heading": "Bu link etibarsızdır və ya müddəti bitib",
+        "body": "E-poçtunuzu daxil edin, yeni təsdiq linki göndərəcəyik.",
+        "emailLabel": "E-poçt",
+        "resend": "Təsdiq e-poçtunu yenidən göndər",
+        "resent": "Göndərildi! Poçtunuzu yoxlayın."
+      }
     }
   },
   "admin": {
@@ -263,9 +328,17 @@
     "colSessions": "Sessiyalar",
     "colOpen": "Aç",
     "role": { "USER": "İstifadəçi", "ADMIN": "Admin" },
+    "status": { "active": "Aktiv", "blocked": "Bloklanıb" },
+    "block": "Blokla",
+    "unblock": "Blokdan çıxar",
+    "cannotBlockSelf": "Öz hesabınızı bloklaya bilməzsiniz.",
     "usersLoadError": "İstifadəçiləri yükləmək mümkün olmadı.",
     "eventsLoadError": "Tədbirləri yükləmək mümkün olmadı.",
     "updateError": "Dəyişikliyi yadda saxlamaq mümkün olmadı.",
+    "usersTotal_one": "{{count}} istifadəçi",
+    "usersTotal_other": "{{count}} istifadəçi",
+    "eventsTotal_one": "{{count}} tədbir",
+    "eventsTotal_other": "{{count}} tədbir",
     "forbiddenHeading": "Admin girişi tələb olunur",
     "forbiddenBody": "Bu hesab platforma administratoru deyil."
   },
@@ -275,6 +348,7 @@
     "usage": {
       "eventsOf": "Bu il {{total}} tədbirdən {{used}}-i istifadə olunub",
       "eventsUnlimited": "Limitsiz tədbir",
+      "overQuota": "pulsuz limitdən artıq",
       "upgrade": "Planı yüksəlt"
     },
     "eventsList": {
@@ -319,6 +393,7 @@
       "hall": "Zal",
       "startTime": "Başlama vaxtı",
       "endTime": "Bitmə vaxtı",
+      "sessionTimeHint": "Tədbirin tarixləri daxilində olmalıdır: {{start}} – {{end}}",
       "adding": "Əlavə edilir…",
       "addSession": "Sessiya əlavə et"
     },
@@ -474,13 +549,22 @@
       "creating": "Yaradılır…",
       "addQuestion": "Sual əlavə et",
       "empty": "Bu sessiyada hələ oyun sualı yoxdur.",
-      "closeAndReveal": "Bağla və aç"
+      "closeAndReveal": "Bağla və aç",
+      "reopen": "Yenidən aç",
+      "deleteQuestion": "Sualı sil",
+      "deleteConfirm": "Bu sual silinsin?",
+      "deleteConfirmWithAnswers_one": "Bu sual silinsin? {{count}} cavab və onların xalları da silinəcək.",
+      "deleteConfirmWithAnswers_other": "Bu sual silinsin? {{count}} cavab və onların xalları da silinəcək.",
+      "yesDelete": "Bəli, sil",
+      "deleting": "Silinir…",
+      "deleteError": "Sualı silmək mümkün olmadı."
     }
   },
   "analytics": {
     "backToOperator": "← Operator Panelinə qayıt",
     "fallbackTitle": "Analitika",
     "exportFullReport": "Tam hesabatı ixrac et",
+    "exporting": "İxrac olunur…",
     "stats": {
       "questions": "Suallar",
       "sentToScreen": "Ekrana göndərilib",
@@ -572,8 +656,17 @@
         "eyebrowWithPoints": "Xal oyunu · {{points}} xal",
         "emptyHeading": "Hazırda heç bir sual canlı deyil",
         "emptyBody": "Aparıcı sual başladanda burada görünəcək.",
-        "nameLabel": "Adınız (liderlər lövhəsi üçün)",
-        "namePlaceholder": "İstəyə bağlı",
+        "name": {
+          "heading": "Liderlər lövhəsi üçün ad seçin",
+          "body": "Bütün sessiya boyu bu adla oynayacaqsınız ki, kimin qazandığı hamıya görünsün.",
+          "label": "Adınız",
+          "placeholder": "məsələn, Aygün",
+          "submit": "Oynamağa başla",
+          "submitting": "Yadda saxlanılır…",
+          "playingAsLabel": "Oynayır",
+          "change": "Dəyiş",
+          "fallbackError": "Adınızı yadda saxlamaq mümkün olmadı. Yenidən cəhd edin."
+        },
         "fallbackError": "Cavabınızı göndərmək mümkün olmadı.",
         "answerLocked": "Cavab qeydə alındı — açıqlanması gözlənilir…",
         "resultsIn": "Nəticələr hazırdır — aşağıdakı liderlər lövhəsinə bax.",

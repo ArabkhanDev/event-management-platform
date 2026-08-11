@@ -77,10 +77,12 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     finalHeaders["Content-Type"] = "Content-Type" in finalHeaders ? finalHeaders["Content-Type"] : "application/json";
   }
 
+  let hasAuthToken = false;
   if (auth) {
     const token = getToken();
     if (token) {
       finalHeaders["Authorization"] = `Bearer ${token}`;
+      hasAuthToken = true;
     }
   }
 
@@ -115,6 +117,23 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       data && typeof data === "object" && "code" in data && typeof (data as { code?: unknown }).code === "string"
         ? (data as { code: string }).code
         : undefined;
+
+    // Checked on every authenticated request, not just login (see
+    // JwtAuthFilter): a token stays valid for up to seven days, so someone
+    // blocked mid-session would otherwise keep hitting this on whatever
+    // they're doing without ever being signed out. A hard redirect (not just
+    // clearing storage) is used because this module has no React context to
+    // update — AuthProvider's state wouldn't notice a localStorage change on
+    // its own. Gated on hasAuthToken so the login request itself (which
+    // never attaches a token) doesn't trigger this — otherwise the redirect
+    // reloads the page out from under Login.tsx before it can show the
+    // blocked-account error message.
+    if (code === "ACCOUNT_BLOCKED" && hasAuthToken) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      window.location.href = "/login";
+    }
+
     throw new ApiError(res.status, message, code);
   }
 

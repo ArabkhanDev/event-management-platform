@@ -13,6 +13,7 @@ import type {
   PresentationDto,
   QuestionDto,
   SessionLeaderboardDto,
+  SessionPlayerDto,
   StageState,
   SurveyDto,
 } from "../../types/api";
@@ -64,6 +65,19 @@ function setPlayerName(name: string) {
   } catch {
     // ignore storage failures
   }
+}
+
+/**
+ * Reserves a leaderboard name for this device in this session. Names are unique
+ * per session, so this is what turns a remembered name into one the attendee
+ * actually holds here — and what rejects it when someone else got there first.
+ */
+function claimPlayerName(sessionId: string, name: string): Promise<SessionPlayerDto> {
+  return api.post<SessionPlayerDto>(
+    `/public/sessions/${sessionId}/player-name`,
+    { name },
+    { auth: false, headers: { "X-Voter-Token": getVoterToken() } }
+  );
 }
 
 export default function AttendeeSession() {
@@ -131,6 +145,12 @@ export default function AttendeeSession() {
     useCallback((topic, type, payload) => {
       if (topic === "stage" && type === "STAGE_STATE") setStageState(payload as StageState);
       if (topic === "game" && type === "GAME_QUESTION_UPDATED") setActiveGame(payload as GameQuestionDto);
+      if (topic === "game" && type === "GAME_QUESTION_DELETED") {
+        // Only clear if it is the question on screen — deleting an old one
+        // should not blank out whatever is running now.
+        const deletedId = (payload as { id: string }).id;
+        setActiveGame((current) => (current && current.id === deletedId ? null : current));
+      }
       if (topic === "game" && type === "LEADERBOARD_UPDATED") setLeaderboard(payload as SessionLeaderboardDto);
       if (topic === "presentation" && type === "PRESENTATION_UPDATED") {
         const next = payload as PresentationDto;
@@ -211,7 +231,9 @@ export default function AttendeeSession() {
 
         {tab === "ask" && sessionId && <AskTab sessionId={sessionId} readOnly={readOnly} />}
         {tab === "vote" && <VoteTab poll={activePoll} readOnly={readOnly} />}
-        {tab === "game" && <GameTab question={activeGame} leaderboard={leaderboard} readOnly={readOnly} />}
+        {tab === "game" && sessionId && (
+          <GameTab sessionId={sessionId} question={activeGame} leaderboard={leaderboard} readOnly={readOnly} />
+        )}
         {tab === "slides" && <SlidesTab presentation={presentation} />}
         {tab === "feedback" && survey && <FeedbackTab survey={survey} readOnly={readOnly} />}
       </main>
@@ -393,10 +415,12 @@ function VoteTab({ poll, readOnly }: { poll: PollDto | null; readOnly: boolean }
 }
 
 function GameTab({
+  sessionId,
   question,
   leaderboard,
   readOnly,
 }: {
+  sessionId: string;
   readOnly: boolean;
   question: GameQuestionDto | null;
   leaderboard: SessionLeaderboardDto | null;
@@ -406,46 +430,88 @@ function GameTab({
   const [answering, setAnswering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
-  const [name, setName] = useState(getPlayerName());
+
+  const [claimedName, setClaimedName] = useState<string | null>(null);
+  const [nameDraft, setNameDraft] = useState(getPlayerName());
+  const [claiming, setClaiming] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [restoringName, setRestoringName] = useState(true);
 
   useEffect(() => {
     setLocalQuestion(question);
     if (question) setHasAnswered(getIdSet(ANSWERED_GAMES_KEY).has(question.id));
   }, [question]);
 
-  if (!localQuestion) {
-    return (
-      <div className="att-session-head">
-        <p className="eyebrow">{t("attendee.session.game.eyebrow")}</p>
-        <h3>{t("attendee.session.game.emptyHeading")}</h3>
-        <p>{t("attendee.session.game.emptyBody")}</p>
-      </div>
-    );
-  }
+  // The remembered name is global but names are only unique within a session,
+  // so it has to be re-reserved here rather than trusted: whoever the attendee
+  // was at last week's event may already be taken in this room. A rejection
+  // just leaves claimedName null, which shows the gate.
+  useEffect(() => {
+    const stored = getPlayerName().trim();
+    if (readOnly || !stored) {
+      setRestoringName(false);
+      return;
+    }
+    let cancelled = false;
+    claimPlayerName(sessionId, stored)
+      .then((player) => {
+        if (cancelled) return;
+        setPlayerName(player.displayName);
+        setClaimedName(player.displayName);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setRestoringName(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, readOnly]);
 
-  const total = localQuestion.options.reduce((sum, o) => sum + o.answerCount, 0);
-  const canAnswer = localQuestion.status === "ACTIVE" && !hasAnswered;
-  const revealed = localQuestion.status === "CLOSED";
+  async function onClaimName(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = nameDraft.trim();
+    if (!trimmed) return;
+    setClaiming(true);
+    setNameError(null);
+    try {
+      const player = await claimPlayerName(sessionId, trimmed);
+      setPlayerName(player.displayName);
+      setClaimedName(player.displayName);
+      setNameDraft(player.displayName);
+    } catch (err) {
+      setNameError(err instanceof ApiError ? err.message : t("attendee.session.game.name.fallbackError"));
+    } finally {
+      setClaiming(false);
+    }
+  }
 
   async function answer(optionId: string) {
     if (!localQuestion) return;
     setAnswering(true);
     setError(null);
-    const trimmedName = name.trim();
-    setPlayerName(trimmedName);
     try {
       const updated = await api.post<GameQuestionDto>(
         `/public/games/${localQuestion.id}/answer`,
-        { optionId, playerName: trimmedName || undefined },
+        { optionId },
         { auth: false, headers: { "X-Voter-Token": getVoterToken() } }
       );
       setLocalQuestion(updated);
       markId(ANSWERED_GAMES_KEY, localQuestion.id);
       setHasAnswered(true);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409) {
+      // Checked before the generic 409 below: that branch means "you already
+      // answered" and locks the card, which would be the wrong outcome for a
+      // question that simply is not live.
+      if (err instanceof ApiError && err.code === "GAME_NOT_ACCEPTING_ANSWERS") {
+        setError(err.message);
+      } else if (err instanceof ApiError && err.status === 409) {
         markId(ANSWERED_GAMES_KEY, localQuestion.id);
         setHasAnswered(true);
+      } else if (err instanceof ApiError && err.code === "PLAYER_NAME_REQUIRED") {
+        // The reservation is gone server-side — send them back through the gate
+        // rather than showing an error they cannot act on.
+        setClaimedName(null);
       } else {
         setError(err instanceof ApiError ? err.message : t("attendee.session.game.fallbackError"));
       }
@@ -454,6 +520,70 @@ function GameTab({
     }
   }
 
+  // Asked before the question rather than beside it: a live question is timed,
+  // and whoever still had to type a name would be answering with a handicap.
+  if (!readOnly && !claimedName) {
+    return (
+      <div>
+        <div className="att-session-head">
+          <p className="eyebrow">{t("attendee.session.game.eyebrow")}</p>
+          <h3>{t("attendee.session.game.name.heading")}</h3>
+          <p>{t("attendee.session.game.name.body")}</p>
+        </div>
+
+        <form onSubmit={onClaimName}>
+          <div className="field">
+            <label htmlFor="player-name">{t("attendee.session.game.name.label")}</label>
+            <input
+              id="player-name"
+              className="input"
+              value={nameDraft}
+              maxLength={40}
+              autoComplete="nickname"
+              disabled={restoringName}
+              onChange={(e) => setNameDraft(e.target.value)}
+              placeholder={t("attendee.session.game.name.placeholder")}
+            />
+          </div>
+
+          {nameError && (
+            <p className="form-error" role="alert">
+              {nameError}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            className="btn btn-primary btn-block"
+            disabled={claiming || restoringName || !nameDraft.trim()}
+          >
+            {claiming ? t("attendee.session.game.name.submitting") : t("attendee.session.game.name.submit")}
+          </button>
+        </form>
+
+        <GameLeaderboard leaderboard={leaderboard} />
+      </div>
+    );
+  }
+
+  if (!localQuestion) {
+    return (
+      <div>
+        <div className="att-session-head">
+          <p className="eyebrow">{t("attendee.session.game.eyebrow")}</p>
+          <h3>{t("attendee.session.game.emptyHeading")}</h3>
+          <p>{t("attendee.session.game.emptyBody")}</p>
+        </div>
+        {claimedName && <PlayingAs name={claimedName} onChange={() => setClaimedName(null)} />}
+        <GameLeaderboard leaderboard={leaderboard} />
+      </div>
+    );
+  }
+
+  const total = localQuestion.options.reduce((sum, o) => sum + o.answerCount, 0);
+  const canAnswer = localQuestion.status === "ACTIVE" && !hasAnswered;
+  const revealed = localQuestion.status === "CLOSED";
+
   return (
     <div>
       <div className="att-session-head">
@@ -461,18 +591,7 @@ function GameTab({
         <h3>{localQuestion.prompt}</h3>
       </div>
 
-      {canAnswer && (
-        <div className="field">
-          <label htmlFor="player-name">{t("attendee.session.game.nameLabel")}</label>
-          <input
-            id="player-name"
-            className="input"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={t("attendee.session.game.namePlaceholder")}
-          />
-        </div>
-      )}
+      {claimedName && <PlayingAs name={claimedName} onChange={() => setClaimedName(null)} />}
 
       {error && (
         <p className="form-error" role="alert">
@@ -513,26 +632,62 @@ function GameTab({
             );
           })}
 
-      {leaderboard && leaderboard.entries.length > 0 && (
-        <>
-          <hr className="rule" style={{ margin: "var(--space-6) 0" }} />
-          <p className="mono" style={{ color: "var(--color-ink-faint)", marginBottom: "var(--space-3)" }}>
-            {t("common.leaderboard")}
-          </p>
-          <ol className="leaderboard-list">
-            {leaderboard.entries.slice(0, 5).map((entry, i) => (
-              <li key={entry.playerId} className="leaderboard-row">
-                <span className="leaderboard-rank">{i + 1}</span>
-                <span className="leaderboard-name">{entry.playerName}</span>
-                <span className="mono leaderboard-points">
-                  {entry.totalPoints} {t("common.points")}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </>
-      )}
+      <GameLeaderboard leaderboard={leaderboard} />
     </div>
+  );
+}
+
+function PlayingAs({ name, onChange }: { name: string; onChange: () => void }) {
+  const { t } = useTranslation();
+  // Array.from, not [0] — a surrogate pair (or an emoji nickname) would come
+  // back as half a character with plain indexing.
+  const initial = Array.from(name.trim())[0] ?? "?";
+
+  return (
+    <div className="att-identity">
+      <span className="att-identity-avatar" aria-hidden="true">
+        {initial}
+      </span>
+      <span className="att-identity-text">
+        <span className="att-identity-label">{t("attendee.session.game.name.playingAsLabel")}</span>
+        <span className="att-identity-name" title={name}>
+          {name}
+        </span>
+      </span>
+      <button type="button" className="att-identity-change" onClick={onChange}>
+        <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+        {t("attendee.session.game.name.change")}
+      </button>
+    </div>
+  );
+}
+
+function GameLeaderboard({ leaderboard }: { leaderboard: SessionLeaderboardDto | null }) {
+  const { t } = useTranslation();
+
+  if (!leaderboard || leaderboard.entries.length === 0) return null;
+
+  return (
+    <>
+      <hr className="rule" style={{ margin: "var(--space-6) 0" }} />
+      <p className="mono" style={{ color: "var(--color-ink-faint)", marginBottom: "var(--space-3)" }}>
+        {t("common.leaderboard")}
+      </p>
+      <ol className="leaderboard-list">
+        {leaderboard.entries.slice(0, 5).map((entry, i) => (
+          <li key={entry.playerId} className="leaderboard-row">
+            <span className="leaderboard-rank">{i + 1}</span>
+            <span className="leaderboard-name">{entry.playerName}</span>
+            <span className="mono leaderboard-points">
+              {entry.totalPoints} {t("common.points")}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </>
   );
 }
 

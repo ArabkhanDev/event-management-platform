@@ -164,6 +164,25 @@ export default function OperatorBoard() {
     });
   }, []);
 
+  const removeGameQuestion = useCallback(
+    (id: string) => {
+      setGameQuestionsLive((prev) => {
+        if (!prev.has(id)) return prev;
+        const next = new Map(prev);
+        next.delete(id);
+        return next;
+      });
+      // The fetched list is the other half of this panel's state: the effect
+      // above seeds the live map from it and only ever adds. Dropping the
+      // question from the map alone leaves it in the cache, which puts the
+      // card straight back on the next seed — and again on every remount.
+      queryClient.setQueryData<GameQuestionDto[]>(["games", sessionId], (prev) =>
+        prev ? prev.filter((q) => q.id !== id) : prev
+      );
+    },
+    [queryClient, sessionId]
+  );
+
   useSessionSocket(
     sessionId,
     ["questions", "polls", "game", "stage", "presentation"],
@@ -181,6 +200,8 @@ export default function OperatorBoard() {
           upsertPoll(payload as PollDto);
         } else if (topic === "game" && type === "GAME_QUESTION_UPDATED") {
           upsertGameQuestion(payload as GameQuestionDto);
+        } else if (topic === "game" && type === "GAME_QUESTION_DELETED") {
+          removeGameQuestion((payload as { id: string }).id);
         } else if (topic === "game" && type === "LEADERBOARD_UPDATED") {
           setLeaderboard(payload as SessionLeaderboardDto);
         } else if (topic === "stage" && type === "STAGE_STATE") {
@@ -189,7 +210,7 @@ export default function OperatorBoard() {
           upsertPresentation(payload as PresentationDto);
         }
       },
-      [queryClient, sessionId, upsertPoll, upsertGameQuestion, upsertPresentation]
+      [queryClient, sessionId, upsertPoll, upsertGameQuestion, removeGameQuestion, upsertPresentation]
     )
   );
 
@@ -304,6 +325,7 @@ export default function OperatorBoard() {
                 questions={gameQuestions}
                 leaderboard={leaderboard}
                 onUpsertQuestion={upsertGameQuestion}
+                onRemoveQuestion={removeGameQuestion}
               />
             </div>
             <div className="op-module-panel" hidden={activeModule !== "survey"}>

@@ -17,6 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Slf4j
@@ -39,6 +42,7 @@ public class SessionServiceHandler implements SessionService {
         if (request.getTitle() == null || request.getTitle().isBlank()) {
             throw ApiException.badRequest("error.common.titleRequired");
         }
+        validateWindow(event, request.getStartTime(), request.getEndTime());
 
         Session session = Session.builder()
                 .event(event)
@@ -90,6 +94,12 @@ public class SessionServiceHandler implements SessionService {
         // the room, not just the next visitor.
         boolean statusChanged = request.getStatus() != null && request.getStatus() != session.getStatus();
 
+        if (request.getStartTime() != null || request.getEndTime() != null) {
+            Instant effectiveStart = request.getStartTime() != null ? request.getStartTime() : session.getStartTime();
+            Instant effectiveEnd = request.getEndTime() != null ? request.getEndTime() : session.getEndTime();
+            validateWindow(session.getEvent(), effectiveStart, effectiveEnd);
+        }
+
         if (request.getTitle() != null) {
             if (request.getTitle().isBlank()) {
                 throw ApiException.badRequest("error.session.titleBlank");
@@ -135,5 +145,31 @@ public class SessionServiceHandler implements SessionService {
     @Override
     public void requireOwner(Event event, Long requesterId) {
         ownershipService.requireOwnerOrAdmin(event, requesterId);
+    }
+
+    /**
+     * Skipped entirely when neither bound is set: start/end time are optional
+     * on a session, and a session with no time carries nothing to check against
+     * the event's date range.
+     */
+    private void validateWindow(Event event, Instant startTime, Instant endTime) {
+        if (startTime == null && endTime == null) {
+            return;
+        }
+        if (startTime != null && endTime != null && endTime.isBefore(startTime)) {
+            throw ApiException.badRequest("error.session.endBeforeStart");
+        }
+        if (startTime != null && event.getStartDate() != null
+                && toUtcDate(startTime).isBefore(event.getStartDate())) {
+            throw ApiException.badRequest("error.session.outsideEventDates");
+        }
+        if (endTime != null && event.getEndDate() != null
+                && toUtcDate(endTime).isAfter(event.getEndDate())) {
+            throw ApiException.badRequest("error.session.outsideEventDates");
+        }
+    }
+
+    private LocalDate toUtcDate(Instant instant) {
+        return instant.atZone(ZoneOffset.UTC).toLocalDate();
     }
 }

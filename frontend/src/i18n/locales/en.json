@@ -25,6 +25,12 @@
     "exportCsv": "Export CSV",
     "export": "Export",
     "leaderboard": "Leaderboard",
+    "pagination": {
+      "ariaLabel": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "goToPage": "Go to page {{page}}"
+    },
     "points": "pts",
     "count": {
       "recipients_one": "{{count}} recipient",
@@ -224,11 +230,17 @@
       "heading": "Log in",
       "email": "Email",
       "password": "Password",
+      "forgotPasswordLink": "Forgot password?",
       "submitting": "Logging in…",
       "submit": "Log in",
       "switchPrompt": "New to meet2be?",
       "switchLink": "Create an account",
-      "fallbackError": "Could not log in. Please try again."
+      "fallbackError": "Could not log in. Please try again.",
+      "emailNotVerified": {
+        "body": "Verify {{email}} before logging in — check your inbox for the link we sent when you registered.",
+        "resend": "Resend verification email",
+        "resent": "Sent! Check your inbox."
+      }
     },
     "register": {
       "quote": "“Set up in minutes. No hardware, no app download for attendees.”",
@@ -243,7 +255,60 @@
       "submit": "Create account",
       "switchPrompt": "Already have an account?",
       "switchLink": "Log in",
-      "fallbackError": "Could not create your account. Please try again."
+      "fallbackError": "Could not create your account. Please try again.",
+      "checkEmail": {
+        "eyebrow": "Almost there",
+        "heading": "Check your email",
+        "body": "We sent a verification link to {{email}}. Click it to activate your account.",
+        "resend": "Didn't get it? Resend",
+        "resent": "Sent! Check your inbox.",
+        "backToLogin": "Back to log in"
+      }
+    },
+    "forgotPassword": {
+      "eyebrow": "Reset your password",
+      "heading": "Forgot password?",
+      "body": "Enter your email and we'll send you a link to reset your password.",
+      "email": "Email",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
+      "backToLogin": "Back to log in",
+      "sent": {
+        "heading": "Check your email",
+        "body": "If an account exists for {{email}}, we've sent a link to reset your password."
+      }
+    },
+    "resetPassword": {
+      "eyebrow": "Reset your password",
+      "heading": "Choose a new password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "passwordHint": "At least 8 characters.",
+      "submit": "Reset password",
+      "submitting": "Resetting…",
+      "mismatchError": "Passwords don't match.",
+      "fallbackError": "Could not reset your password. The link may have expired.",
+      "invalidLink": {
+        "heading": "This link is invalid or has expired",
+        "body": "Request a new password reset link and try again.",
+        "cta": "Request a new link"
+      }
+    },
+    "verifyEmail": {
+      "verifying": "Verifying your email…",
+      "success": {
+        "eyebrow": "You're in",
+        "heading": "Email verified",
+        "body": "Redirecting you to your dashboard…"
+      },
+      "error": {
+        "eyebrow": "Verification failed",
+        "heading": "This link is invalid or has expired",
+        "body": "Enter your email below and we'll send you a new verification link.",
+        "emailLabel": "Email",
+        "resend": "Resend verification email",
+        "resent": "Sent! Check your inbox."
+      }
     }
   },
   "admin": {
@@ -263,9 +328,17 @@
     "colSessions": "Sessions",
     "colOpen": "Open",
     "role": { "USER": "User", "ADMIN": "Admin" },
+    "status": { "active": "Active", "blocked": "Blocked" },
+    "block": "Block",
+    "unblock": "Unblock",
+    "cannotBlockSelf": "You can't block your own account.",
     "usersLoadError": "Could not load users.",
     "eventsLoadError": "Could not load events.",
     "updateError": "Could not save the change.",
+    "usersTotal_one": "{{count}} user",
+    "usersTotal_other": "{{count}} users",
+    "eventsTotal_one": "{{count}} event",
+    "eventsTotal_other": "{{count}} events",
     "forbiddenHeading": "Admin access required",
     "forbiddenBody": "This account is not a platform administrator."
   },
@@ -275,6 +348,7 @@
     "usage": {
       "eventsOf": "{{used}} of {{total}} events this year",
       "eventsUnlimited": "Unlimited events",
+      "overQuota": "over your free limit",
       "upgrade": "Upgrade"
     },
     "eventsList": {
@@ -319,6 +393,7 @@
       "hall": "Hall",
       "startTime": "Start time",
       "endTime": "End time",
+      "sessionTimeHint": "Must fall within the event's dates: {{start}} – {{end}}",
       "adding": "Adding…",
       "addSession": "Add session"
     },
@@ -474,13 +549,22 @@
       "creating": "Creating…",
       "addQuestion": "Add question",
       "empty": "No game questions yet in this session.",
-      "closeAndReveal": "Close & reveal"
+      "closeAndReveal": "Close & reveal",
+      "reopen": "Reopen",
+      "deleteQuestion": "Delete question",
+      "deleteConfirm": "Delete this question?",
+      "deleteConfirmWithAnswers_one": "Delete this question? {{count}} answer and its points go with it.",
+      "deleteConfirmWithAnswers_other": "Delete this question? {{count}} answers and their points go with it.",
+      "yesDelete": "Yes, delete",
+      "deleting": "Deleting…",
+      "deleteError": "Could not delete the question."
     }
   },
   "analytics": {
     "backToOperator": "← Back to Operator Board",
     "fallbackTitle": "Analytics",
     "exportFullReport": "Export full report",
+    "exporting": "Exporting…",
     "stats": {
       "questions": "Questions",
       "sentToScreen": "Sent to screen",
@@ -572,8 +656,17 @@
         "eyebrowWithPoints": "Score game · {{points}} pts",
         "emptyHeading": "No question is live right now",
         "emptyBody": "When the host launches a question, it'll appear here.",
-        "nameLabel": "Your name (for the leaderboard)",
-        "namePlaceholder": "Optional",
+        "name": {
+          "heading": "Pick your leaderboard name",
+          "body": "You'll play under this name for the whole session, so everyone can see who is actually winning.",
+          "label": "Your name",
+          "placeholder": "e.g. Ali",
+          "submit": "Start playing",
+          "submitting": "Saving…",
+          "playingAsLabel": "Playing as",
+          "change": "Change",
+          "fallbackError": "Could not save your name. Please try again."
+        },
         "fallbackError": "Could not submit your answer.",
         "answerLocked": "Answer locked in — waiting for the reveal…",
         "resultsIn": "Results are in — check the leaderboard below.",

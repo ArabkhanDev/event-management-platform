@@ -70,14 +70,23 @@ export default function EventsList() {
           {usage && (
             <div className="usage-chip">
               <span className="usage-chip-plan">{t(`dashboard.plan.${usage.plan}`)}</span>
-              <span className="usage-chip-detail">
-                {usage.eventsPerYear === null
-                  ? t("dashboard.usage.eventsUnlimited")
-                  : t("dashboard.usage.eventsOf", { used: usage.eventsUsedThisYear, total: usage.eventsPerYear })}
-              </span>
-              <Link to="/plans" className="usage-chip-link">
-                {t("dashboard.usage.upgrade")}
-              </Link>
+              {usage.eventsPerYear === null ? (
+                <span className="usage-chip-detail">{t("dashboard.usage.eventsUnlimited")}</span>
+              ) : (
+                <span
+                  className={`usage-chip-detail${usage.eventsUsedThisYear > usage.eventsPerYear ? " usage-chip-detail-warn" : ""}`}
+                >
+                  {t("dashboard.usage.eventsOf", { used: usage.eventsUsedThisYear, total: usage.eventsPerYear })}
+                  {usage.eventsUsedThisYear > usage.eventsPerYear && (
+                    <> · {t("dashboard.usage.overQuota")}</>
+                  )}
+                </span>
+              )}
+              {usage.eventsPerYear !== null && (
+                <Link to="/plans" className="btn btn-sm btn-primary usage-chip-upgrade">
+                  {t("dashboard.usage.upgrade")}
+                </Link>
+              )}
             </div>
           )}
         </div>
@@ -169,6 +178,7 @@ export default function EventsList() {
                     type="date"
                     className="input"
                     required
+                    min={startDate || undefined}
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                   />

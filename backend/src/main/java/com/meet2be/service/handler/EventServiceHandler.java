@@ -42,6 +42,7 @@ public class EventServiceHandler implements EventService {
         if (request.getName() == null || request.getName().isBlank()) {
             throw ApiException.badRequest("error.event.nameRequired");
         }
+        validateDateRange(request.getStartDate(), request.getEndDate());
 
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> ApiException.notFound("error.user.notFound"));
@@ -60,6 +61,16 @@ public class EventServiceHandler implements EventService {
         log.info("ActionLog.create : Event created successfully, eventId={}, ownerId={}", event.getId(), ownerId);
         logIfOverQuota(owner);
         return event;
+    }
+
+    /** Both dates are required and the range must run forward, not backward. */
+    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw ApiException.badRequest("error.event.datesRequired");
+        }
+        if (endDate.isBefore(startDate)) {
+            throw ApiException.badRequest("error.event.endBeforeStart");
+        }
     }
 
     /**

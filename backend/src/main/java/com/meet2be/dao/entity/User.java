@@ -68,6 +68,45 @@ public class User {
     @Builder.Default
     private UserRole role = UserRole.USER;
 
+    /**
+     * Defaulted to {@code true} at the DB level, not {@code false}, so that
+     * {@code ADD COLUMN} backfills every account that registered before email
+     * verification existed as already-verified — otherwise this migration
+     * would lock every existing user out at their next login. New
+     * registrations override this explicitly to {@code false} in
+     * AuthServiceHandler; the {@code @Builder.Default} below only covers a
+     * caller that forgets to set it.
+     */
+    @Column(nullable = false)
+    @ColumnDefault("true")
+    @Builder.Default
+    private boolean emailVerified = false;
+
+    @Column(name = "verification_token", length = 64)
+    private String verificationToken;
+
+    @Column(name = "verification_token_expires_at")
+    private Instant verificationTokenExpiresAt;
+
+    @Column(name = "reset_token", length = 64)
+    private String resetToken;
+
+    @Column(name = "reset_token_expires_at")
+    private Instant resetTokenExpiresAt;
+
+    /**
+     * Admin-only kill switch, checked at login and on every authenticated
+     * request thereafter (see JwtAuthFilter) — a JWT stays valid for up to
+     * seven days, so a login-only check would let a block take up to a week
+     * to actually take effect. Defaults to {@code false} on both the Java
+     * side and the DB backfill: unlike {@code emailVerified}, the safe
+     * direction for an existing row here is "not blocked".
+     */
+    @Column(nullable = false)
+    @ColumnDefault("false")
+    @Builder.Default
+    private boolean blocked = false;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 

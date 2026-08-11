@@ -44,6 +44,7 @@ export interface AdminUserDto {
   email: string;
   plan: PlanTier;
   role: UserRole;
+  blocked: boolean;
   eventCount: number;
   createdAt: string;
 }
@@ -182,6 +183,21 @@ export interface LeaderboardEntryDto {
 export interface SessionLeaderboardDto {
   sessionId: string;
   entries: LeaderboardEntryDto[];
+}
+
+/** The name an attendee has reserved to play the score game under in one session. */
+export interface SessionPlayerDto {
+  sessionId: string;
+  displayName: string;
+}
+
+/** One page of results plus what the pagination controls need. `page` is zero-based. */
+export interface PageResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 export interface EmailCampaignDto {
