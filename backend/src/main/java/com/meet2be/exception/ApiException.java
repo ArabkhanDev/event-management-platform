@@ -1,5 +1,6 @@
 package com.meet2be.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
  * messages*.properties), not display text — GlobalExceptionHandler resolves
  * it against the request's locale before it ever reaches a client.
  */
+@Getter
 public class ApiException extends RuntimeException {
     private final HttpStatus status;
     private final Object[] args;
@@ -55,15 +57,4 @@ public class ApiException extends RuntimeException {
         return new ApiException(HttpStatus.SERVICE_UNAVAILABLE, messageKey, args);
     }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public Object[] getArgs() {
-        return args;
-    }
 }

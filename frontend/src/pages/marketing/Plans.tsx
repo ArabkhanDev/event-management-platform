@@ -61,16 +61,16 @@ export default function Plans() {
           <p className="eyebrow">{t("plans.eyebrow")}</p>
           <h1>{t("plans.heading")}</h1>
           <p className="lede">{t("plans.lede")}</p>
-          <div className="trust-chips">
-            <span className="trust-chip">
+          <div className="trust-bar">
+            <span className="trust-bar-item">
               <CheckIcon />
               {t("plans.trustFast")}
             </span>
-            <span className="trust-chip">
+            <span className="trust-bar-item">
               <CheckIcon />
               {t("plans.trustNoApp")}
             </span>
-            <span className="trust-chip">
+            <span className="trust-bar-item">
               <CheckIcon />
               {t("plans.trustLanguages")}
             </span>

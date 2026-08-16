@@ -1,23 +1,30 @@
 package com.meet2be.controller;
 
-import com.meet2be.util.CurrentUser;
+import com.meet2be.dao.entity.GameQuestion;
 import com.meet2be.exception.ApiException;
-import com.meet2be.model.request.ClaimPlayerNameRequest;
-import com.meet2be.model.request.CreateGameQuestionRequest;
 import com.meet2be.model.dto.GameQuestionDto;
 import com.meet2be.model.dto.SessionLeaderboardDto;
 import com.meet2be.model.dto.SessionPlayerDto;
+import com.meet2be.model.request.ClaimPlayerNameRequest;
+import com.meet2be.model.request.CreateGameQuestionRequest;
 import com.meet2be.model.request.SubmitGameAnswerRequest;
 import com.meet2be.model.request.UpdateGameStatusRequest;
+import com.meet2be.service.GameService;
+import com.meet2be.service.SessionPlayerService;
+import com.meet2be.util.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import com.meet2be.service.GameService;
-import com.meet2be.service.SessionPlayerService;
-import com.meet2be.dao.entity.GameQuestion;
 
 @RestController
 @RequiredArgsConstructor
@@ -54,8 +61,8 @@ public class GameController {
 
     @PostMapping("/api/public/games/{id}/answer")
     public ResponseEntity<GameQuestionDto> answer(@PathVariable Long id,
-                                                   @RequestHeader(value = "X-Voter-Token", required = false) String voterToken,
-                                                   @RequestBody SubmitGameAnswerRequest request) {
+                                                  @RequestHeader(value = "X-Voter-Token", required = false) String voterToken,
+                                                  @RequestBody SubmitGameAnswerRequest request) {
         return ResponseEntity.ok(gameService.answer(id, voterToken, request.getOptionId(), request.getPlayerName()));
     }
 

@@ -17,28 +17,60 @@
   text-align: center;
 }
 
-.trust-chips {
+/* One bordered bar split into equal cells, not three separate rounded-full
+   pills: --radius-full elsewhere on this page marks an actual badge (the
+   "MOST POPULAR" flag on a plan card), so three of them in a row read as
+   generic trust badges rather than this brand's own language. A single bar
+   with dividers borrows the border/radius/background already used for the
+   included-modules box just below it, so the two sit together as one system
+   instead of two unrelated patterns. Equal-width cells also mean a longer
+   translation wraps to a second line within its own cell instead of
+   stretching a whole pill past its neighbours. */
+.trust-bar {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-3);
+  flex-direction: column;
+  border: var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow: hidden;
 }
 
-.trust-chip {
-  display: inline-flex;
+@media (min-width: 640px) {
+  .trust-bar {
+    flex-direction: row;
+  }
+}
+
+.trust-bar-item {
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
+  flex: 1;
+  padding: var(--space-4) var(--space-5);
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
   letter-spacing: var(--ls-mono);
   text-transform: uppercase;
-  padding: var(--space-2) var(--space-4);
-  border: var(--border);
-  border-radius: var(--radius-full);
   color: var(--color-ink-soft);
+  text-align: center;
 }
 
-.trust-chip .icon {
+/* Divider between cells: a top rule stacked on mobile, a side rule once the
+   bar goes horizontal — never both, so no cell gets a double border. */
+.trust-bar-item + .trust-bar-item {
+  border-top: var(--border);
+}
+
+@media (min-width: 640px) {
+  .trust-bar-item + .trust-bar-item {
+    border-top: none;
+    border-left: var(--border);
+  }
+}
+
+.trust-bar-item .icon {
+  flex-shrink: 0;
   color: var(--color-success);
 }
 
