@@ -193,7 +193,7 @@ export async function exportFullSessionReport(
 ) {
   const { default: Excel } = await import("exceljs");
   const workbook = new Excel.Workbook();
-  workbook.creator = "meet2be";
+  workbook.creator = "auda";
   workbook.created = new Date();
 
   const totalVotes = polls.reduce((sum, p) => sum + p.options.reduce((s, o) => s + o.votes, 0), 0);

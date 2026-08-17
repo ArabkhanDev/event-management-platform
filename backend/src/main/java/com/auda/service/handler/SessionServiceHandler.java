@@ -1,0 +1,175 @@
+package com.auda.service.handler;
+
+import com.auda.dao.entity.Event;
+import com.auda.dao.entity.Session;
+import com.auda.dao.repository.EventRepository;
+import com.auda.dao.repository.SessionRepository;
+import com.auda.exception.ApiException;
+import com.auda.model.enums.SessionStatus;
+import com.auda.model.enums.StageMode;
+import com.auda.model.request.CreateSessionRequest;
+import com.auda.model.request.UpdateSessionRequest;
+import com.auda.service.OwnershipService;
+import com.auda.service.SessionService;
+import com.auda.service.StageStateService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class SessionServiceHandler implements SessionService {
+
+    private final SessionRepository sessionRepository;
+    private final EventRepository eventRepository;
+    private final StageStateService stageStateService;
+    private final OwnershipService ownershipService;
+
+    @Override
+    public Session create(Long eventId, Long requesterId, CreateSessionRequest request) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> ApiException.notFound("error.event.notFound"));
+        requireOwner(event, requesterId);
+
+        if (request.getTitle() == null || request.getTitle().isBlank()) {
+            throw ApiException.badRequest("error.common.titleRequired");
+        }
+        validateWindow(event, request.getStartTime(), request.getEndTime());
+
+        Session session = Session.builder()
+                .event(event)
+                .title(request.getTitle())
+                .speakerName(request.getSpeakerName())
+                .hallName(request.getHallName())
+                .startTime(request.getStartTime())
+                .endTime(request.getEndTime())
+                .status(SessionStatus.SCHEDULED)
+                .stageMode(StageMode.IDLE)
+                .build();
+
+        session = sessionRepository.save(session);
+        log.info("ActionLog.create : Session created successfully, sessionId={}, eventId={}", session.getId(), eventId);
+        return session;
+    }
+
+    @Override
+    public List<Session> listForEvent(Long eventId) {
+        return sessionRepository.findByEventId(eventId);
+    }
+
+    @Override
+    public Session getById(Long id) {
+        return sessionRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("error.session.notFound"));
+    }
+
+    // Fetch + ownership check must happen in one transactional call: getById()'s
+    // repository call closes its persistence context as soon as it returns, so a
+    // caller doing getById() then requireOwner(session.getEvent(), ...) as two
+    // separate calls would hit a LazyInitializationException on the Event proxy.
+    @Override
+    public Session getOwned(Long id, Long requesterId) {
+        Session session = getById(id);
+        requireOwner(session.getEvent(), requesterId);
+        return session;
+    }
+
+    @Override
+    public Session update(Long id, Long requesterId, UpdateSessionRequest request) {
+        Session session = getById(id);
+        requireOwner(session.getEvent(), requesterId);
+
+        boolean stageModeChanged = request.getStageMode() != null && request.getStageMode() != session.getStageMode();
+
+        // Status drives what attendees are allowed to do, and it rides along in
+        // the stage state — so ending a talk has to reach the phones already in
+        // the room, not just the next visitor.
+        boolean statusChanged = request.getStatus() != null && request.getStatus() != session.getStatus();
+
+        if (request.getStartTime() != null || request.getEndTime() != null) {
+            Instant effectiveStart = request.getStartTime() != null ? request.getStartTime() : session.getStartTime();
+            Instant effectiveEnd = request.getEndTime() != null ? request.getEndTime() : session.getEndTime();
+            validateWindow(session.getEvent(), effectiveStart, effectiveEnd);
+        }
+
+        if (request.getTitle() != null) {
+            if (request.getTitle().isBlank()) {
+                throw ApiException.badRequest("error.session.titleBlank");
+            }
+            session.setTitle(request.getTitle());
+        }
+        if (request.getSpeakerName() != null) {
+            session.setSpeakerName(request.getSpeakerName());
+        }
+        if (request.getHallName() != null) {
+            session.setHallName(request.getHallName());
+        }
+        if (request.getStartTime() != null) {
+            session.setStartTime(request.getStartTime());
+        }
+        if (request.getEndTime() != null) {
+            session.setEndTime(request.getEndTime());
+        }
+        if (request.getStatus() != null) {
+            session.setStatus(request.getStatus());
+        }
+        if (request.getStageMode() != null) {
+            session.setStageMode(request.getStageMode());
+        }
+
+        session = sessionRepository.save(session);
+
+        if (stageModeChanged) {
+            log.info("ActionLog.update : Session stage mode changed, sessionId={}, stageMode={}",
+                    session.getId(), session.getStageMode());
+        }
+        if (statusChanged) {
+            log.info("ActionLog.update : Session status changed, sessionId={}, status={}",
+                    session.getId(), session.getStatus());
+        }
+        if (stageModeChanged || statusChanged) {
+            stageStateService.broadcastStageState(session.getId());
+        }
+
+        return session;
+    }
+
+    @Override
+    public void requireOwner(Event event, Long requesterId) {
+        ownershipService.requireOwnerOrAdmin(event, requesterId);
+    }
+
+    /**
+     * Skipped entirely when neither bound is set: start/end time are optional
+     * on a session, and a session with no time carries nothing to check against
+     * the event's date range.
+     */
+    private void validateWindow(Event event, Instant startTime, Instant endTime) {
+        if (startTime == null && endTime == null) {
+            return;
+        }
+        if (startTime != null && endTime != null && endTime.isBefore(startTime)) {
+            throw ApiException.badRequest("error.session.endBeforeStart");
+        }
+        if (startTime != null && event.getStartDate() != null
+                && toUtcDate(startTime).isBefore(event.getStartDate())) {
+            throw ApiException.badRequest("error.session.outsideEventDates");
+        }
+        if (endTime != null && event.getEndDate() != null
+                && toUtcDate(endTime).isAfter(event.getEndDate())) {
+            throw ApiException.badRequest("error.session.outsideEventDates");
+        }
+    }
+
+    private LocalDate toUtcDate(Instant instant) {
+        return instant.atZone(ZoneOffset.UTC).toLocalDate();
+    }
+}

@@ -1,4 +1,4 @@
-# meet2be
+# auda
 
 Live event-engagement platform: Q&A, keypad voting, surveys, presentation
 control and a live stage screen for conferences and congresses.

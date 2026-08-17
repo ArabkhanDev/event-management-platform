@@ -7,8 +7,8 @@ import { LANGUAGE_STORAGE_KEY } from "../i18n";
 export const API_BASE: string =
   (import.meta.env.VITE_API_BASE as string | undefined) || "http://localhost:8080/api";
 
-export const TOKEN_KEY = "meet2be_token";
-export const USER_KEY = "meet2be_user";
+export const TOKEN_KEY = "auda_token";
+export const USER_KEY = "auda_user";
 
 function getLanguage(): string {
   try {

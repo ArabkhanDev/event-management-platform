@@ -87,7 +87,7 @@ export default function JoinEvent() {
       <div className="attendee-topbar">
         <Link to="/" className="nav-logo">
           <span className="nav-logo-mark" aria-hidden="true" />
-          meet2be
+          auda
         </Link>
         <LanguageSwitcher />
       </div>

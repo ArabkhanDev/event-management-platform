@@ -1,19 +1,19 @@
-# meet2be-backend
+# auda-backend
 
-Spring Boot 3.3.4 / Java 21 backend for the meet2be.com clone: event management,
+Spring Boot 3.3.4 / Java 21 backend for auda: event management,
 live Q&A, keypad polling, surveys, and a live stage-screen state broadcast over
 WebSocket (STOMP/SockJS).
 
 ## 1. Start local PostgreSQL
 
 This spins up a Postgres container with a database, user, and password matching
-the `application.yml` defaults (`meet2be` / `meet2be` / `meet2be`):
+the `application.yml` defaults (`auda` / `auda` / `auda`):
 
 ```bash
-docker run --name meet2be-postgres \
-  -e POSTGRES_DB=meet2be \
-  -e POSTGRES_USER=meet2be \
-  -e POSTGRES_PASSWORD=meet2be \
+docker run --name auda-postgres \
+  -e POSTGRES_DB=auda \
+  -e POSTGRES_USER=auda \
+  -e POSTGRES_PASSWORD=auda \
   -p 5432:5432 \
   -d postgres:16
 ```

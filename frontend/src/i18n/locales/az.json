@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "meet2be",
+    "appName": "auda",
     "back": "Geri",
     "backToDashboard": "İdarə panelinə qayıt",
     "backToEvent": "Tədbirə qayıt",
@@ -79,7 +79,7 @@
       "eyebrow": "Canlı tədbir iştirak platforması",
       "headingLine1": "Zalı idarə et.",
       "headingLine2": "Təkcə slaydları yox.",
-      "lede": "meet2be konfrans təşkilatçılarına canlı sual-cavab, klaviatura ilə səsvermə, sorğular və səhnə ekranı üçün vahid idarəetmə paneli verir — hər sessiya bir yayım əvəzinə qarşılıqlı söhbətə çevrilir.",
+      "lede": "auda konfrans təşkilatçılarına canlı sual-cavab, klaviatura ilə səsvermə, sorğular və səhnə ekranı üçün vahid idarəetmə paneli verir — hər sessiya bir yayım əvəzinə qarşılıqlı söhbətə çevrilir.",
       "joinWithCode": "Kodla tədbirə qoşul",
       "meta1": "Tədbiri yarat",
       "meta2": "Zalı fəallaşdır",
@@ -233,7 +233,7 @@
       "forgotPasswordLink": "Şifrəni unutmusunuz?",
       "submitting": "Daxil olunur…",
       "submit": "Daxil ol",
-      "switchPrompt": "meet2be-də yenisiniz?",
+      "switchPrompt": "auda-də yenisiniz?",
       "switchLink": "Hesab yarat",
       "fallbackError": "Daxil olmaq mümkün olmadı. Yenidən cəhd edin.",
       "emailNotVerified": {
@@ -582,12 +582,12 @@
     "export": "İxrac et"
   },
   "stage": {
-    "topbar": "meet2be — səhnə",
+    "topbar": "auda — səhnə",
     "live": "Canlı",
     "connecting": "Qoşulur…",
     "breakHeading": "Tezliklə qayıdırıq",
     "breakBody": "Bu sessiya qısa fasilədədir.",
-    "idleHeading": "meet2be",
+    "idleHeading": "auda",
     "idleBody": "Növbəti sual və ya sorğu gözlənilir…"
   },
   "attendee": {

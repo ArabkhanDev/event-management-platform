@@ -51,7 +51,7 @@ export default function Register() {
       <aside className="auth-side">
         <Link to="/" className="nav-logo text-on-dark">
           <span className="nav-logo-mark" aria-hidden="true" />
-          meet2be
+          auda
         </Link>
         <blockquote>{t("auth.register.quote")}</blockquote>
         <p className="mono auth-side-foot">{t("auth.register.sideFoot")}</p>

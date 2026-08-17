@@ -179,7 +179,7 @@ export default function Plans() {
                       {meta.price === 0 ? t("plans.startFree") : t("common.getStarted")}
                     </Link>
                   ) : (
-                    <a href="mailto:hello@meet2be.example" className="btn btn-block">
+                    <a href="mailto:hello@auda.example" className="btn btn-block">
                       {t("plans.requestQuote")}
                     </a>
                   )}
@@ -221,7 +221,7 @@ export default function Plans() {
               <Link to="/register" className="btn btn-primary">
                 {t("common.getStarted")}
               </Link>
-              <a href="mailto:hello@meet2be.example" className="btn">
+              <a href="mailto:hello@auda.example" className="btn">
                 {t("plans.requestDemo")}
                 <ArrowIcon />
               </a>

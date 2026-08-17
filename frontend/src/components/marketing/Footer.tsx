@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="footer-col">
             <Link to="/" className="nav-logo">
               <span className="nav-logo-mark" aria-hidden="true" />
-              meet2be
+              auda
             </Link>
             <p style={{ marginTop: "var(--space-3)", maxWidth: "32ch" }}>{t("footer.tagline")}</p>
           </div>
@@ -34,13 +34,13 @@ export default function Footer() {
           <div className="footer-col">
             <h5>{t("footer.company")}</h5>
             <ul>
-              <li><a href="mailto:hello@meet2be.example">{t("footer.contact")}</a></li>
+              <li><a href="mailto:hello@auda.example">{t("footer.contact")}</a></li>
               <li><a href="#modules">{t("footer.careers")}</a></li>
             </ul>
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} meet2be</span>
+          <span>© {new Date().getFullYear()} auda</span>
           <span>{t("footer.bottomTagline")}</span>
         </div>
       </div>

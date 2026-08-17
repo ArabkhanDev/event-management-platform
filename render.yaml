@@ -6,7 +6,7 @@
 
 services:
   - type: web
-    name: meet2be-api
+    name: auda-api
     runtime: docker
     plan: free
     region: frankfurt

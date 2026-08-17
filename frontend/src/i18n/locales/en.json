@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "meet2be",
+    "appName": "auda",
     "back": "Back",
     "backToDashboard": "Back to dashboard",
     "backToEvent": "Back to event",
@@ -79,7 +79,7 @@
       "eyebrow": "Live event engagement platform",
       "headingLine1": "Run the room.",
       "headingLine2": "Not just the slides.",
-      "lede": "meet2be gives conference organizers one control surface for live Q&A, keypad voting, surveys, and the stage screen itself — so every session turns into a two-way conversation instead of a broadcast.",
+      "lede": "auda gives conference organizers one control surface for live Q&A, keypad voting, surveys, and the stage screen itself — so every session turns into a two-way conversation instead of a broadcast.",
       "joinWithCode": "Join an event with a code",
       "meta1": "Create the event",
       "meta2": "Engage the room",
@@ -233,7 +233,7 @@
       "forgotPasswordLink": "Forgot password?",
       "submitting": "Logging in…",
       "submit": "Log in",
-      "switchPrompt": "New to meet2be?",
+      "switchPrompt": "New to auda?",
       "switchLink": "Create an account",
       "fallbackError": "Could not log in. Please try again.",
       "emailNotVerified": {
@@ -582,12 +582,12 @@
     "export": "Export"
   },
   "stage": {
-    "topbar": "meet2be — stage",
+    "topbar": "auda — stage",
     "live": "Live",
     "connecting": "Connecting…",
     "breakHeading": "Back soon",
     "breakBody": "This session is on a short break.",
-    "idleHeading": "meet2be",
+    "idleHeading": "auda",
     "idleBody": "Waiting for the next question or poll…"
   },
   "attendee": {

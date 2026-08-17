@@ -1,6 +1,6 @@
-# meet2be — frontend
+# auda — frontend
 
-React + TypeScript + Vite frontend for the meet2be event-engagement platform
+React + TypeScript + Vite frontend for the auda event-engagement platform
 (live Q&A, keypad voting, surveys, and stage-screen control for conferences
 and congresses).
 

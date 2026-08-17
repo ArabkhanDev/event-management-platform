@@ -31,7 +31,7 @@ export default function Header() {
       <div className="container nav-inner">
         <Link to="/" className="nav-logo">
           <span className="nav-logo-mark" aria-hidden="true" />
-          meet2be
+          auda
         </Link>
         <nav className="nav-links" aria-label="Primary">
           {LINKS.map((l) => (

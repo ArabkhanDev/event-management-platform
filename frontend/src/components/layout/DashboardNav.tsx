@@ -18,7 +18,7 @@ export default function DashboardNav() {
       <div className="container dash-nav-inner">
         <Link to="/dashboard" className="nav-logo">
           <span className="nav-logo-mark" aria-hidden="true" />
-          meet2be
+          auda
         </Link>
         <div className="dash-nav-user">
           <LanguageSwitcher />

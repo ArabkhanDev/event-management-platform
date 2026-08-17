@@ -1,0 +1,18 @@
+package com.auda.model.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class LeaderboardEntryDto {
+    private String playerId;
+    private String playerName;
+    private int totalPoints;
+    private int correctAnswers;
+    private int totalAnswers;
+}

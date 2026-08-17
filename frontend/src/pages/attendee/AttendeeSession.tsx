@@ -20,9 +20,9 @@ import type {
 
 type Tab = "ask" | "vote" | "game" | "feedback" | "slides";
 
-const VOTED_POLLS_KEY = "meet2be_voted_polls";
-const ANSWERED_GAMES_KEY = "meet2be_answered_games";
-const PLAYER_NAME_KEY = "meet2be_player_name";
+const VOTED_POLLS_KEY = "auda_voted_polls";
+const ANSWERED_GAMES_KEY = "auda_answered_games";
+const PLAYER_NAME_KEY = "auda_player_name";
 
 function getIdSet(key: string): Set<string> {
   try {
@@ -174,7 +174,7 @@ export default function AttendeeSession() {
         <div className="attendee-topbar">
           <Link to="/" className="nav-logo">
             <span className="nav-logo-mark" aria-hidden="true" />
-            meet2be
+            auda
           </Link>
           <LanguageSwitcher />
         </div>
@@ -196,7 +196,7 @@ export default function AttendeeSession() {
       <div className="attendee-topbar">
         <Link to="/" className="nav-logo">
           <span className="nav-logo-mark" aria-hidden="true" />
-          meet2be
+          auda
         </Link>
         <LanguageSwitcher />
       </div>

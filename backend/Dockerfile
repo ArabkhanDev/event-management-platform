@@ -26,11 +26,11 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends fontconfig fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
-RUN useradd --system --create-home --shell /usr/sbin/nologin meet2be
-USER meet2be
-WORKDIR /home/meet2be
+RUN useradd --system --create-home --shell /usr/sbin/nologin auda
+USER auda
+WORKDIR /home/auda
 
-COPY --from=build --chown=meet2be:meet2be /workspace/app.jar ./app.jar
+COPY --from=build --chown=auda:auda /workspace/app.jar ./app.jar
 
 # Tuned for a 512MB free-tier container: percentage-based heap so the JVM sees
 # the cgroup limit, SerialGC because parallel collectors waste memory on a

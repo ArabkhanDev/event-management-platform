@@ -1,7 +1,7 @@
 // Anonymous attendee identity used to dedupe public poll votes / survey
 // responses via the X-Voter-Token header. Created once per browser.
 
-const VOTER_TOKEN_KEY = "meet2be_voter_token";
+const VOTER_TOKEN_KEY = "auda_voter_token";
 
 export function getVoterToken(): string {
   try {
