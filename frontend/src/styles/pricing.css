@@ -139,6 +139,69 @@
   transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
 
+/* Once cards sit side by side, every card becomes a 10-row subgrid sharing
+   its parent's row tracks — the price, included row, credit rows and CTA
+   all land on the exact same line across cards regardless of how many lines
+   a tagline or blurb wraps to in a given translation. Below this breakpoint
+   cards stack full-width one per row, so there is nothing to align and the
+   plain flex-column layout above is left as-is.
+   grid-auto-rows repeats its 10-value list for every implicit row band, so
+   this also holds a 2-and-2 tablet layout in sync within each pair without
+   forcing the two pairs to match each other's height. */
+@media (min-width: 720px) {
+  .plan-cards {
+    grid-auto-rows: auto auto auto auto auto auto auto auto minmax(var(--space-4), 1fr) auto;
+  }
+
+  .plan-card {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 10;
+  }
+
+  .plan-card-name {
+    grid-row: 1;
+  }
+
+  .plan-card-tagline {
+    grid-row: 2;
+  }
+
+  .plan-card-blurb {
+    grid-row: 3;
+  }
+
+  .plan-price {
+    grid-row: 4;
+    align-self: start;
+  }
+
+  .plan-included-row {
+    grid-row: 5;
+  }
+
+  .plan-credit-row--events {
+    grid-row: 6;
+  }
+
+  .plan-credit-row--attendees {
+    grid-row: 7;
+  }
+
+  .plan-overage-note {
+    grid-row: 8;
+  }
+
+  .plan-rule {
+    grid-row: 9;
+    align-self: end;
+  }
+
+  .plan-cta {
+    grid-row: 10;
+  }
+}
+
 .plan-card.popular {
   border-color: var(--color-primary);
   box-shadow: var(--shadow-lg);
@@ -172,6 +235,12 @@
 .plan-card-blurb {
   font-size: var(--fs-small);
   margin-bottom: var(--space-5);
+}
+
+.plan-overage-note {
+  font-size: var(--fs-small);
+  color: var(--color-ink-faint);
+  margin: var(--space-2) 0 0;
 }
 
 .plan-price {
@@ -230,8 +299,6 @@
   border: none;
   border-top: var(--border);
   margin: var(--space-4) 0;
-  flex: 1;
-  align-self: flex-end;
 }
 
 .plan-discount-note {

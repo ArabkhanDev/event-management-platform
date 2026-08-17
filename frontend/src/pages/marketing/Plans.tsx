@@ -149,7 +149,7 @@ export default function Plans() {
                     <CheckIcon />
                     <span>{t("plans.allModulesIncluded")}</span>
                   </div>
-                  <div className="plan-credit-row">
+                  <div className="plan-credit-row plan-credit-row--events">
                     <CalendarIcon />
                     <span>
                       {meta.eventsPerYear
@@ -157,7 +157,7 @@ export default function Plans() {
                         : t("plans.unlimitedEvents")}
                     </span>
                   </div>
-                  <div className="plan-credit-row">
+                  <div className="plan-credit-row plan-credit-row--attendees">
                     <UsersIcon />
                     <span>
                       {meta.attendeesPerEvent
@@ -167,19 +167,17 @@ export default function Plans() {
                   </div>
 
                   {meta.overagePrice !== null && (
-                    <p className="plan-card-blurb" style={{ marginTop: "var(--space-2)", marginBottom: 0, flex: 1 }}>
-                      {t("plans.extraEventPrice", { price: meta.overagePrice })}
-                    </p>
+                    <p className="plan-overage-note">{t("plans.extraEventPrice", { price: meta.overagePrice })}</p>
                   )}
 
-                  <hr className="plan-rule" style={{ marginTop: "var(--space-5)" }} />
+                  <hr className="plan-rule" />
 
                   {meta.price !== null ? (
-                    <Link to="/register" className={`btn btn-block${meta.popular ? " btn-primary" : ""}`}>
+                    <Link to="/register" className={`btn btn-block plan-cta${meta.popular ? " btn-primary" : ""}`}>
                       {meta.price === 0 ? t("plans.startFree") : t("common.getStarted")}
                     </Link>
                   ) : (
-                    <a href="mailto:hello@auda.example" className="btn btn-block">
+                    <a href="mailto:hello@auda.example" className="btn btn-block plan-cta">
                       {t("plans.requestQuote")}
                     </a>
                   )}
